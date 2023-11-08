@@ -4,20 +4,20 @@ import 'package:point_of_sale_app/admin/products_data_table.dart';
 import 'package:point_of_sale_app/general/drawer.dart';
 import 'package:point_of_sale_app/general/my_custom_appbar.dart';
 
-class AdminScreen extends StatefulWidget {
-  const AdminScreen({Key? key}) : super(key: key);
+class ProductsScreen extends StatefulWidget {
+  const ProductsScreen({Key? key}) : super(key: key);
 
   @override
-  State<AdminScreen> createState() => _AdminScreenState();
+  State<ProductsScreen> createState() => _ProductsScreenState();
 }
 
-class _AdminScreenState extends State<AdminScreen> {
+class _ProductsScreenState extends State<ProductsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const ReusableDrawer(
         title: 'Home',
-        currentPage: AdminScreen(),
+        currentPage: ProductsScreen(),
       ),
       appBar: myCustomAppBar(
         "Admin panel",

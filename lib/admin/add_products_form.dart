@@ -261,7 +261,7 @@ class _AddProductState extends State<AddProduct> {
                 }
 
                 Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const AdminScreen()));
+                    builder: (context) => const ProductsScreen()));
               },
               label: const Text("Submit"),
             ),

@@ -41,7 +41,7 @@ class ReusableDrawer extends StatelessWidget {
           ),
           _createDrawerItem(
             title: 'Home',
-            page: const AdminScreen(),
+            page: const ProductsScreen(),
           ),
           _createDrawerItem(
             title: 'Users',
