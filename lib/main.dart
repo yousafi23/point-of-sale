@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/admin/products_screen.dart';
+import 'package:point_of_sale_app/login/login_screen.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 Future main() async {
@@ -19,8 +20,8 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: ProductsScreen(),
+    return MaterialApp(
+      home: LoginScreen(),
     );
   }
 }

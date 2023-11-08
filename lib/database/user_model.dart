@@ -2,12 +2,14 @@
 import 'dart:convert';
 
 class UserModel {
+  final int? userId;
   final String name;
   final String userName;
   final String password;
   final bool isAdmin;
 
   UserModel({
+    this.userId,
     required this.name,
     required this.userName,
     required this.password,
@@ -15,12 +17,14 @@ class UserModel {
   });
 
   UserModel copyWith({
+    int? userId,
     String? name,
     String? userName,
     String? password,
     bool? isAdmin,
   }) {
     return UserModel(
+      userId: userId ?? this.userId,
       name: name ?? this.name,
       userName: userName ?? this.userName,
       password: password ?? this.password,
@@ -39,6 +43,7 @@ class UserModel {
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
+      userId: map['userId'] != null ? map['userId'] as int : null,
       name: map['name'] as String,
       userName: map['userName'] as String,
       password: map['password'] as String,
@@ -53,14 +58,15 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(name: $name, userName: $userName, password: $password, isAdmin: $isAdmin)';
+    return 'UserModel(sizeId: $userId, name: $name, userName: $userName, password: $password, isAdmin: $isAdmin)';
   }
 
   @override
   bool operator ==(covariant UserModel other) {
     if (identical(this, other)) return true;
 
-    return other.name == name &&
+    return other.userId == userId &&
+        other.name == name &&
         other.userName == userName &&
         other.password == password &&
         other.isAdmin == isAdmin;
@@ -68,7 +74,8 @@ class UserModel {
 
   @override
   int get hashCode {
-    return name.hashCode ^
+    return userId.hashCode ^
+        name.hashCode ^
         userName.hashCode ^
         password.hashCode ^
         isAdmin.hashCode;

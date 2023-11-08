@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:point_of_sale_app/database/user_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
@@ -131,6 +132,24 @@ class DatabaseHelper {
       where: where,
       whereArgs: [id],
     );
+  }
+
+  Future<UserModel?> loginCheck(String username, String password) async {
+    final Database? db = await instance.database;
+    final List<Map<String, Object?>>? result = await db?.query(
+      'Users',
+      where: 'userName = ? AND password = ?',
+      whereArgs: [username, password],
+    );
+
+    if (result!.isNotEmpty) {
+      // print('resss=${result}');
+      // print('resss=${result[0]}');
+      // print('Model=${UserModel.fromMap(result[0])}');
+      return UserModel.fromMap(result[0]);
+    } else {
+      return null;
+    }
   }
 
   Future<int> getQuantity(int orderItemId) async {
