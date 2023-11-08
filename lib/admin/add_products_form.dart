@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:point_of_sale_app/admin/admin_screen.dart';
+import 'package:point_of_sale_app/admin/products_screen.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/database/size_model.dart';
 import 'package:point_of_sale_app/general/my_custom_appbar.dart';

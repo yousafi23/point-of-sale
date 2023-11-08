@@ -86,7 +86,6 @@ class _AddUserState extends State<AddUser> {
                   await DatabaseHelper.instance.updateRecord(
                       'Users', userModel.toMap(), 'userId=?', widget.userId!);
                 } else {
-                  print('scscs');
                   await DatabaseHelper.instance
                       .insertRecord('Users', userModel.toMap());
                 }

@@ -4,7 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
-  static const dbName = 'slie.db';
+  static const dbName = 'slieww.db';
   static const dbVersion = 1;
 
   static final DatabaseHelper instance = DatabaseHelper();
@@ -35,6 +35,15 @@ class DatabaseHelper {
       companyName TEXT,
       supplierName TEXT
     )''');
+    await db.execute('''
+    CREATE TABLE Ingredients (
+      ingredientId INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT,
+      unitCost INT,
+      stock INT NOT NULL,
+      companyName TEXT,
+      supplierName TEXT
+    ) ''');
     await db.execute('''
     CREATE TABLE  OrderItems (
       orderItemId INTEGER PRIMARY KEY AUTOINCREMENT,

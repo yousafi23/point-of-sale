@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:point_of_sale_app/admin/admin_screen.dart';
+import 'package:point_of_sale_app/admin/ingredients_screen.dart';
+import 'package:point_of_sale_app/admin/products_screen.dart';
 import 'package:point_of_sale_app/admin/users_screen.dart';
 import 'package:point_of_sale_app/pos_screen/pos_screen.dart';
 
@@ -40,8 +41,12 @@ class ReusableDrawer extends StatelessWidget {
             child: Text('Drawer Header'),
           ),
           _createDrawerItem(
-            title: 'Home',
+            title: 'Products',
             page: const ProductsScreen(),
+          ),
+          _createDrawerItem(
+            title: 'Ingredients',
+            page: const IngredientsScreen(),
           ),
           _createDrawerItem(
             title: 'Users',
