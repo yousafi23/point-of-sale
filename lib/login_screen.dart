@@ -23,10 +23,11 @@ class LoginScreen extends StatelessWidget {
             FutureBuilder<CompanyModel?>(
               future: DatabaseHelper.instance.loadCompanyData(0),
               builder: (context, snapshot) {
+                // print('snapshot=$snapshot');
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
                 } else if (snapshot.hasError || snapshot.data == null) {
-                  return const Text('Error loading company data.');
+                  return const Text('Error loading data.(Add Logo and title)');
                 } else {
                   final CompanyModel company = snapshot.data!;
                   return Column(
@@ -37,21 +38,20 @@ class LoginScreen extends StatelessWidget {
                           children: [
                             Image.memory(
                               company.companyLogo,
-                              height: 300,
-                              width: 300,
+                              height: 250,
+                              width: 250,
                             ),
                             const SizedBox(height: 20),
                             Text(
                               company.companyName,
                               style: const TextStyle(
-                                fontSize: 20,
+                                fontSize: 30,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      // ... rest of your existing code ...
                     ],
                   );
                 }
@@ -66,6 +66,13 @@ class LoginScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: <Widget>[
+                      const Text(
+                        'Log In',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       TextField(
                         controller: usernameController,
                         decoration: const InputDecoration(

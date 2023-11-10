@@ -5,7 +5,8 @@ class CompanyModel {
   final String companyName;
   final Uint8List companyLogo;
 
-  CompanyModel({this.companyId, required this.companyName, required this.companyLogo});
+  CompanyModel(
+      {this.companyId, required this.companyName, required this.companyLogo});
 
   Map<String, dynamic> toMap() {
     return {
@@ -16,7 +17,7 @@ class CompanyModel {
 
   factory CompanyModel.fromMap(Map<String, dynamic> map) {
     return CompanyModel(
-      companyId : map['companyId'],
+      companyId: map['companyId'],
       companyName: map['companyName'],
       companyLogo: map['companyLogo'],
     );

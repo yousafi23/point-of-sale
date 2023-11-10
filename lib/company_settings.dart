@@ -5,15 +5,16 @@ import 'package:image_picker/image_picker.dart';
 import 'package:point_of_sale_app/database/company_model.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 
+// ignore: must_be_immutable
 class CompanySettingsScreen extends StatefulWidget {
-  const CompanySettingsScreen({Key? key}) : super(key: key);
+  CompanySettingsScreen({super.key});
 
   @override
   _CompanySettingsScreenState createState() => _CompanySettingsScreenState();
 }
 
 class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
-  TextEditingController companyNameController = TextEditingController();
+  final companyNameController = TextEditingController();
   File? logoImage;
 
   Future<void> _getImage() async {
@@ -31,7 +32,7 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
     if (logoImage == null) return;
 
     final Uint8List bytes = await logoImage!.readAsBytes();
-    print('BYTEss=$logoImage');
+    // print('BYTEss=$logoImage');
     // print('BYTEss=$bytes');
 
     final CompanyModel companyModel = CompanyModel(
@@ -39,7 +40,9 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
       companyLogo: bytes,
     );
 
-    await DatabaseHelper.instance.insertRecord('Company', companyModel.toMap());
+    // print('modd=${companyModel.toMap()}');
+    await DatabaseHelper.instance
+        .updateRecord('Company', companyModel.toMap(), 'companyId=?', 0);
   }
 
   @override
@@ -73,7 +76,7 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
             ElevatedButton(
               onPressed: () async {
                 await _saveToDatabase();
-                print(logoImage);
+                // print(logoImage);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Settings saved to database')),
                 );

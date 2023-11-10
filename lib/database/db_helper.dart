@@ -143,13 +143,17 @@ class DatabaseHelper {
 
   Future<CompanyModel?> loadCompanyData(int id) async {
     final Database? db = await instance.database;
+    // print('function');
     final List<Map<String, Object?>>? result = await db?.query(
       'Company',
       where: 'companyId = ?',
-      whereArgs: [id],
+      whereArgs: [0],
     );
 
     if (result!.isNotEmpty) {
+      // print('resss=${result}');
+      // print('resss=${result[0]}');
+      // print('Model=${CompanyModel.fromMap(result[0])}');
       return CompanyModel.fromMap(result[0]);
     } else {
       return null;
@@ -201,14 +205,6 @@ class DatabaseHelper {
       return count;
     }
     return -1;
-  }
-
-  Future<List<CompanyModel>> getAllImages() async {
-    final Database? db = await instance.database;
-    final List<Map<String, Object?>>? maps = await db?.query('Company');
-    return List.generate(maps!.length, (i) {
-      return CompanyModel.fromMap(maps[i]);
-    });
   }
 
   Future<void> truncateTable(String dbTable) async {
