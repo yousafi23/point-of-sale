@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:point_of_sale_app/database/company_model.dart';
 import 'package:point_of_sale_app/database/user_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
-  static const dbName = 'slieww.db';
+  static const dbName = 'sqlite.db';
   static const dbVersion = 1;
 
   static final DatabaseHelper instance = DatabaseHelper();
@@ -69,6 +70,12 @@ class DatabaseHelper {
       userName TEXT,
       password VARCHAR,
       isAdmin BOOL
+    ) ''');
+    await db.execute('''
+    CREATE TABLE Company (
+      companyId INTEGER PRIMARY KEY AUTOINCREMENT,
+      companyName TEXT,
+      companyLogo BLOB
     ) ''');
   }
 
@@ -134,6 +141,21 @@ class DatabaseHelper {
     );
   }
 
+  Future<CompanyModel?> loadCompanyData(int id) async {
+    final Database? db = await instance.database;
+    final List<Map<String, Object?>>? result = await db?.query(
+      'Company',
+      where: 'companyId = ?',
+      whereArgs: [id],
+    );
+
+    if (result!.isNotEmpty) {
+      return CompanyModel.fromMap(result[0]);
+    } else {
+      return null;
+    }
+  }
+
   Future<UserModel?> loginCheck(String username, String password) async {
     final Database? db = await instance.database;
     final List<Map<String, Object?>>? result = await db?.query(
@@ -179,6 +201,14 @@ class DatabaseHelper {
       return count;
     }
     return -1;
+  }
+
+  Future<List<CompanyModel>> getAllImages() async {
+    final Database? db = await instance.database;
+    final List<Map<String, Object?>>? maps = await db?.query('Company');
+    return List.generate(maps!.length, (i) {
+      return CompanyModel.fromMap(maps[i]);
+    });
   }
 
   Future<void> truncateTable(String dbTable) async {

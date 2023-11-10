@@ -13,7 +13,6 @@ class UserDataTable extends StatefulWidget {
 
 class _UserDataTableState extends State<UserDataTable> {
   List<Map<String, dynamic>> usersTableData = [];
-  List<Map<String, dynamic>> sizeTableData = [];
 
   @override
   void initState() {

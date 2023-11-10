@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/admin/products_screen.dart';
+import 'package:point_of_sale_app/database/company_model.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/database/user_model.dart';
 import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
@@ -19,25 +20,42 @@ class LoginScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Container(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                children: [
-                  Image.asset(
-                    'assets/yumtumLOGO.jpg', // Replace with your image path
-                    height: 200,
-                    width: 200,
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'YUMMY TUMMY',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+            FutureBuilder<CompanyModel?>(
+              future: DatabaseHelper.instance.loadCompanyData(0),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else if (snapshot.hasError || snapshot.data == null) {
+                  return const Text('Error loading company data.');
+                } else {
+                  final CompanyModel company = snapshot.data!;
+                  return Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          children: [
+                            Image.memory(
+                              company.companyLogo,
+                              height: 300,
+                              width: 300,
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              company.companyName,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // ... rest of your existing code ...
+                    ],
+                  );
+                }
+              },
             ),
             Padding(
               padding: const EdgeInsets.all(20.0),

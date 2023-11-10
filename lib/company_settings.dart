@@ -1,11 +1,9 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:typed_data';
-import 'dart:io';
-import 'dart:async';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:point_of_sale_app/database/company_model.dart';
+import 'package:point_of_sale_app/database/db_helper.dart';
 
 class CompanySettingsScreen extends StatefulWidget {
   const CompanySettingsScreen({Key? key}) : super(key: key);
@@ -20,7 +18,6 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
 
   Future<void> _getImage() async {
     final pickedFile =
-        // await ImagePicker().getImage(source: ImageSource.gallery);
         await ImagePicker().pickImage(source: ImageSource.gallery);
 
     setState(() {
@@ -30,13 +27,19 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
     });
   }
 
-  Future<void> _saveToAssets() async {
+  Future<void> _saveToDatabase() async {
     if (logoImage == null) return;
 
-    final ByteData data = await rootBundle.load('assets/logo/company_logo.png');
-    final List<int> bytes = data.buffer.asUint8List();
+    final Uint8List bytes = await logoImage!.readAsBytes();
+    print('BYTEss=$logoImage');
+    // print('BYTEss=$bytes');
 
-    await File('assets/logo/company_logo.png').writeAsBytes(bytes);
+    final CompanyModel companyModel = CompanyModel(
+      companyName: companyNameController.text,
+      companyLogo: bytes,
+    );
+
+    await DatabaseHelper.instance.insertRecord('Company', companyModel.toMap());
   }
 
   @override
@@ -69,12 +72,13 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                await _saveToAssets();
+                await _saveToDatabase();
+                print(logoImage);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Logo saved to assets')),
+                  const SnackBar(content: Text('Settings saved to database')),
                 );
               },
-              child: const Text('Save to Assets'),
+              child: const Text('Save'),
             ),
           ],
         ),

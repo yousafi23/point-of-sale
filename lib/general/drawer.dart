@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/admin/ingredients_screen.dart';
 import 'package:point_of_sale_app/admin/products_screen.dart';
 import 'package:point_of_sale_app/admin/users_screen.dart';
-import 'package:point_of_sale_app/general/company_settings.dart';
+import 'package:point_of_sale_app/company_settings.dart';
+import 'package:point_of_sale_app/login_screen.dart';
 import 'package:point_of_sale_app/pos_screen/pos_screen.dart';
 
 class ReusableDrawer extends StatelessWidget {
@@ -60,6 +61,10 @@ class ReusableDrawer extends StatelessWidget {
           _createDrawerItem(
             title: 'POS',
             page: const PosScreen(),
+          ),
+          _createDrawerItem(
+            title: 'Log Out',
+            page: LoginScreen(),
           ),
         ],
       ),
