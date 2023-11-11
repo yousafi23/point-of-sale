@@ -3,11 +3,8 @@ import 'package:point_of_sale_app/admin/ingredients_screen.dart';
 import 'package:point_of_sale_app/admin/products_screen.dart';
 import 'package:point_of_sale_app/admin/users_screen.dart';
 import 'package:point_of_sale_app/company_settings.dart';
-import 'package:point_of_sale_app/database/company_model.dart';
-import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/login_screen.dart';
 import 'package:point_of_sale_app/pos_screen/pos_screen.dart';
-import 'package:sqflite/sqflite.dart';
 
 class ReusableDrawer extends StatelessWidget {
   final String title;
@@ -48,7 +45,7 @@ class ReusableDrawer extends StatelessWidget {
       //     },
       //   );
       // }
-      
+
       return ListTile(
         title: Text(title),
         onTap: () {

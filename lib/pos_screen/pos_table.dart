@@ -3,9 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/database/order_item_model.dart';
 import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
+import 'package:point_of_sale_app/pos_screen/order_selection.dart';
+
+typedef ReloadCallback = void Function();
 
 class PosTableWidget extends StatefulWidget {
-  const PosTableWidget({Key? key}) : super(key: key);
+  const PosTableWidget({Key? key, required this.reloadCallback})
+      : super(key: key);
+
+  final ReloadCallback reloadCallback;
 
   @override
   _PosTableWidgetState createState() => _PosTableWidgetState();
@@ -68,11 +74,14 @@ class _PosTableWidgetState extends State<PosTableWidget> {
                           await DatabaseHelper.instance.insertRecord(
                               'OrderItems', orderItemModel.toMap());
 
-                          var prodName = row['prodName'];
+                          // print('curr=${orderSelectionKey.currentState}');
+
+                          widget.reloadCallback(); // Trigger reload
 
                           ScaffoldMessenger.of(context).showSnackBar(
                               myCustomSnackBar(
-                                  message: '$prodName Added', warning: false));
+                                  message: '${row['prodName']} Added',
+                                  warning: false));
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                               myCustomSnackBar(

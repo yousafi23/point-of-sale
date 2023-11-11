@@ -24,30 +24,35 @@ class _PosScreenState extends State<PosScreen> {
         "POS",
         const Color.fromARGB(255, 2, 122, 4),
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          alignment: Alignment.center,
-          child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const PosTableWidget(),
-                Column(
-                  children: [
-                    TextButton(
-                        onPressed: () async {
-                          await DatabaseHelper.instance
-                              .truncateTable('OrderItems');
-                        },
-                        child: const Text("Truncate orderItems ")),
-                    const OrderSelection()
-                  ],
-                )
-              ],
-            ),
+      body: Container(
+        alignment: Alignment.center,
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SingleChildScrollView(
+                child: PosTableWidget(
+                  reloadCallback: () {
+                    setState(() {
+                      // Reload logic for OrderSelection // Reload logic for OrderSelection
+                      // Assuming OrderSelection has a key for GlobalKey<OrderSelectionState>
+                      orderSelectionKey.currentState?.reloadData();
+                      // print('widgetnnn=${orderSelectionKey.currentState}');
+
+                      // print('widget=${orderSelectionKey.currentWidget}');
+                    });
+                  },
+                ),
+              ),
+              const SingleChildScrollView(
+                child: Column(
+                  children: [OrderSelection()],
+                ),
+              )
+            ],
           ),
         ),
       ),

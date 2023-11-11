@@ -56,6 +56,13 @@ class DatabaseHelper {
       FOREIGN KEY (productId) REFERENCES Products (productId)
     )''');
     await db.execute('''
+    CREATE TABLE  Orders (
+      orderId INTEGER PRIMARY KEY AUTOINCREMENT,
+      orderDate DATETIME,
+      grandTotal DOUBLE,
+      orderItemId TEXT,
+    )''');
+    await db.execute('''
     CREATE TABLE Size (
       sizeId INTEGER PRIMARY KEY AUTOINCREMENT,
       size TEXT,
@@ -70,6 +77,14 @@ class DatabaseHelper {
       userName TEXT,
       password VARCHAR,
       isAdmin BOOL
+    ) ''');
+    await db.execute('''
+    INSERT INTO Users (userId,name,userName,password,isAdmin) VALUES (
+    '0',
+    'admin',
+    'admin',
+    'admin',
+    '1'
     ) ''');
     await db.execute('''
     CREATE TABLE Company (

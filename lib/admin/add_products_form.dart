@@ -4,6 +4,7 @@ import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/database/size_model.dart';
 import 'package:point_of_sale_app/general/my_custom_appbar.dart';
 import 'package:point_of_sale_app/database/product_model.dart';
+import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
 
 // ignore: must_be_immutable
 class AddProduct extends StatefulWidget {
@@ -140,25 +141,6 @@ class _AddProductState extends State<AddProduct> {
                   width: 300,
                   child: Column(
                     children: [
-                      // Row(
-                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      //   children: [
-                      //     TextFormField(
-                      //       decoration: const InputDecoration(
-                      //         labelText: 'Size',
-                      //         constraints: BoxConstraints(maxWidth: 120),
-                      //       ),
-                      //       controller: s1Cont,
-                      //     ),
-                      //     TextFormField(
-                      //       decoration: const InputDecoration(
-                      //         labelText: 'Cost',
-                      //         constraints: BoxConstraints(maxWidth: 120),
-                      //       ),
-                      //       controller: p1Cont,
-                      //     ),
-                      //   ],
-                      // ),
                       ListView.builder(
                         shrinkWrap: true,
                         itemCount: sizesController.length,
@@ -243,6 +225,12 @@ class _AddProductState extends State<AddProduct> {
                         widget.sizeIds![i] as int);
                     // print('Final= ${sizeModel.toString()}');
                   }
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    myCustomSnackBar(
+                      message: 'Product Updated: ${productModel.prodName}',
+                      warning: false,
+                    ),
+                  );
                 } else {
                   var prodId = await DatabaseHelper.instance
                       .insertRecord('Products', productModel.toMap());
@@ -258,6 +246,13 @@ class _AddProductState extends State<AddProduct> {
                     await DatabaseHelper.instance
                         .insertRecord('Size', sizeModel.toMap());
                   }
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    myCustomSnackBar(
+                      message: 'Product Added: ${productModel.prodName}',
+                      warning: false,
+                    ),
+                  );
                 }
 
                 Navigator.of(context).push(MaterialPageRoute(
