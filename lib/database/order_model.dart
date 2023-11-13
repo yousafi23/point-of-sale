@@ -1,43 +1,41 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
-
 class OrderModel {
   final DateTime orderDate;
   final double grandTotal;
-  final List<String> orderItemId;
+  final String orderItemsList;
   OrderModel({
     required this.orderDate,
     required this.grandTotal,
-    required this.orderItemId,
+    required this.orderItemsList,
   });
 
   OrderModel copyWith({
     DateTime? orderDate,
     double? grandTotal,
-    List<String>? orderItemId,
+    String? orderItemsList,
   }) {
     return OrderModel(
       orderDate: orderDate ?? this.orderDate,
       grandTotal: grandTotal ?? this.grandTotal,
-      orderItemId: orderItemId ?? this.orderItemId,
+      orderItemsList: orderItemsList ?? this.orderItemsList,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'orderDate': orderDate.millisecondsSinceEpoch,
+      'orderDate': orderDate.toString(),
       'grandTotal': grandTotal,
-      'orderItemId': orderItemId,
+      'orderItemsList': orderItemsList,
     };
   }
 
   factory OrderModel.fromMap(Map<String, dynamic> map) {
     return OrderModel(
-      orderDate: DateTime.fromMillisecondsSinceEpoch(map['orderDate'] as int),
+      orderDate: map['orderDate'],
       grandTotal: map['grandTotal'] as double,
-      orderItemId: List<String>.from((map['orderItemId'] as List<String>)),
+      orderItemsList: map['orderItemsList'] as String,
     );
   }
 
@@ -48,7 +46,7 @@ class OrderModel {
 
   @override
   String toString() =>
-      'OrderModel(orderDate: $orderDate, grandTotal: $grandTotal, orderItemId: $orderItemId)';
+      'OrderModel(orderDate: $orderDate, grandTotal: $grandTotal, orderItemsList: $orderItemsList)';
 
   @override
   bool operator ==(covariant OrderModel other) {
@@ -56,10 +54,10 @@ class OrderModel {
 
     return other.orderDate == orderDate &&
         other.grandTotal == grandTotal &&
-        listEquals(other.orderItemId, orderItemId);
+        other.orderItemsList == orderItemsList;
   }
 
   @override
   int get hashCode =>
-      orderDate.hashCode ^ grandTotal.hashCode ^ orderItemId.hashCode;
+      orderDate.hashCode ^ grandTotal.hashCode ^ orderItemsList.hashCode;
 }

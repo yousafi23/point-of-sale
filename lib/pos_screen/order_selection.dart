@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
+import 'package:point_of_sale_app/database/order_model.dart';
+import 'package:point_of_sale_app/general/confirmation_alert.dart';
 import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
 
 // ignore: must_be_immutable
@@ -114,16 +116,29 @@ class _OrderSelectionState extends State<OrderSelection> {
         Text('Grand Total:\t\t\tRs ${grandTotal.toStringAsFixed(1)}',
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         FloatingActionButton.extended(
-            onPressed: () {
-              // print(currentdate);
+          onPressed: () async {
+            OrderModel orderModel = OrderModel(
+                orderDate: DateTime.now(),
+                grandTotal: grandTotal,
+                orderItemsList: widget.orderItems.toString());
 
-              // OrderModel orderModel = OrderModel(
-              //     orderDate: DateTime.now(),
-              //     grandTotal: grandTotal,
-              //     orderItemId: row['orderItemId']);
-              // DatabaseHelper.instance.insertRecord('Orders', )
-            },
-            label: const Text('Place Order'))
+            // print('Model=${orderModel.toMap()}');
+            // print('str=${widget.orderItems}');
+            final bool confirmed = await showPlaceOrderConfirmation(context);
+            if (confirmed) {
+              await DatabaseHelper.instance
+                  .insertRecord('Orders', orderModel.toMap());
+              await DatabaseHelper.instance.truncateTable('OrderItems');
+            }
+            ScaffoldMessenger.of(context).showSnackBar(myCustomSnackBar(
+              message: 'Order Placed!\t\t\t\t Total: $grandTotal',
+              warning: false,
+            ));
+
+            await _loadData();
+          },
+          label: const Text('Place Order'),
+        )
       ],
     );
   }

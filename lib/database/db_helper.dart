@@ -6,7 +6,7 @@ import 'package:point_of_sale_app/database/user_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
-  static const dbName = 'sqlite12.db';
+  static const dbName = 'sqliteNew.db';
   static const dbVersion = 1;
 
   static final DatabaseHelper instance = DatabaseHelper();
@@ -60,7 +60,7 @@ class DatabaseHelper {
       orderId INTEGER PRIMARY KEY AUTOINCREMENT,
       orderDate DATETIME,
       grandTotal DOUBLE,
-      orderItems TEXT
+      orderItemsList TEXT
     )''');
     await db.execute('''
     CREATE TABLE Size (
@@ -87,7 +87,7 @@ class DatabaseHelper {
     await db.execute('''
     INSERT INTO Users (userId,name,userName,password,isAdmin)
     VALUES 
-    ('0','admin','admin','admin','1')
+    ('0','admin','admin','admin','1'),
     ('1','staff','staff','staff','0')
     ''');
     await db.execute('''
