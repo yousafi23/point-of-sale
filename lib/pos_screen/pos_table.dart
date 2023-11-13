@@ -3,15 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/database/order_item_model.dart';
 import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
-import 'package:point_of_sale_app/pos_screen/order_selection.dart';
-
-typedef ReloadCallback = void Function();
 
 class PosTableWidget extends StatefulWidget {
-  const PosTableWidget({Key? key, required this.reloadCallback})
-      : super(key: key);
+  PosTableWidget({Key? key, required this.reloadCallback}) : super(key: key);
 
-  final ReloadCallback reloadCallback;
+  final Function reloadCallback;
 
   @override
   _PosTableWidgetState createState() => _PosTableWidgetState();

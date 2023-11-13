@@ -13,6 +13,8 @@ class PosScreen extends StatefulWidget {
 }
 
 class _PosScreenState extends State<PosScreen> {
+  List<Map<String, dynamic>> productsData = [];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,21 +37,18 @@ class _PosScreenState extends State<PosScreen> {
             children: [
               SingleChildScrollView(
                 child: PosTableWidget(
-                  reloadCallback: () {
+                  reloadCallback: () async {
+                    final database = await DatabaseHelper.instance.database;
+                    final result = await database?.query('OrderItems');
                     setState(() {
-                      // Reload logic for OrderSelection // Reload logic for OrderSelection
-                      // Assuming OrderSelection has a key for GlobalKey<OrderSelectionState>
-                      orderSelectionKey.currentState?.reloadData();
-                      // print('widgetnnn=${orderSelectionKey.currentState}');
-
-                      // print('widget=${orderSelectionKey.currentWidget}');
+                      productsData = result!;
                     });
                   },
                 ),
               ),
-              const SingleChildScrollView(
+              SingleChildScrollView(
                 child: Column(
-                  children: [OrderSelection()],
+                  children: [OrderSelection(orderItems: productsData)],
                 ),
               )
             ],

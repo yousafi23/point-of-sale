@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
-import 'package:point_of_sale_app/database/order_model.dart';
 import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
 
+// ignore: must_be_immutable
 class OrderSelection extends StatefulWidget {
-  const OrderSelection({super.key});
+  OrderSelection({super.key, required this.orderItems});
+  List<Map<String, dynamic>> orderItems;
 
   @override
   State<OrderSelection> createState() => _OrderSelectionState();
 }
 
-final GlobalKey<_OrderSelectionState> orderSelectionKey =
-    GlobalKey<_OrderSelectionState>();
-
 class _OrderSelectionState extends State<OrderSelection> {
-  List<Map<String, dynamic>> OrderItems = [];
   double grandTotal = 0.0;
   int orderItemId = 0;
 
@@ -28,42 +25,23 @@ class _OrderSelectionState extends State<OrderSelection> {
     final database = await DatabaseHelper.instance.database;
     final result = await database?.query('OrderItems');
     setState(() {
-      OrderItems = result!;
+      widget.orderItems = result!;
       calculateGrandTotal();
     });
   }
 
   // Add this function to calculate the grand total
   void calculateGrandTotal() {
-    grandTotal = OrderItems.fold<double>(0.0, (sum, item) {
+    grandTotal = widget.orderItems.fold<double>(0.0, (sum, item) {
       return sum + (item['quantity'] * item['price']);
     });
   }
 
-  // Add this function to trigger data reload
-  void reloadData() {
-    _loadData();
-  }
-
   @override
   Widget build(BuildContext context) {
+    calculateGrandTotal();
     return Column(
       children: [
-        TextButton(
-          onPressed: () async {
-            await DatabaseHelper.instance.truncateTable('OrderItems');
-            _loadData();
-          },
-          child: const Text("Truncate orderItems "),
-        ),
-        TextButton(
-          onPressed: () async {
-            while (true) {
-              await _loadData();
-            }
-          },
-          child: const Text("Reload"),
-        ),
         DataTable(
           columns: const [
             DataColumn(label: Text('Name')),
@@ -74,7 +52,7 @@ class _OrderSelectionState extends State<OrderSelection> {
             DataColumn(label: Text('')),
             DataColumn(label: Text('')),
           ],
-          rows: OrderItems.map<DataRow>((Map<String, dynamic> row) {
+          rows: widget.orderItems.map<DataRow>((Map<String, dynamic> row) {
             return DataRow(
               cells: [
                 DataCell(Text(row['prodName'])),
