@@ -59,9 +59,8 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
             if (logoImage != null)
               Image.file(
                 logoImage!,
-                height: 100,
-                width: 100,
-                fit: BoxFit.cover,
+                height: 300,
+                width: 300,
               ),
             ElevatedButton(
               onPressed: _getImage,
