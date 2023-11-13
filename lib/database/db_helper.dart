@@ -6,7 +6,7 @@ import 'package:point_of_sale_app/database/user_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
-  static const dbName = 'sqlite.db';
+  static const dbName = 'sqlite12.db';
   static const dbVersion = 1;
 
   static final DatabaseHelper instance = DatabaseHelper();
@@ -60,7 +60,7 @@ class DatabaseHelper {
       orderId INTEGER PRIMARY KEY AUTOINCREMENT,
       orderDate DATETIME,
       grandTotal DOUBLE,
-      orderItemId TEXT,
+      orderItems TEXT
     )''');
     await db.execute('''
     CREATE TABLE Size (
@@ -85,13 +85,40 @@ class DatabaseHelper {
       companyLogo BLOB
     ) ''');
     await db.execute('''
-    INSERT INTO Users (userId,name,userName,password,isAdmin) VALUES (
-    '0',
-    'admin',
-    'admin',
-    'admin',
-    '1'
-    ) ''');
+    INSERT INTO Users (userId,name,userName,password,isAdmin)
+    VALUES 
+    ('0','admin','admin','admin','1')
+    ('1','staff','staff','staff','0')
+    ''');
+    await db.execute('''
+    INSERT INTO Products (category, prodName, barCode, unitCost, unitPrice, stock, companyName, supplierName)
+    VALUES 
+    ('PIZZA', 'Special Pizza', '123456', 350, 680, 1000, 'Pizza Co.', 'Supplier1'),
+    ('PIZZA', 'Chicken Fajita', '789012', 320, 620, 950, 'Pizza Co.', 'Supplier2'),
+    ('SODA WATER', 'Zinger', '345678', 150, 320, 600, 'Beverage Co.', 'Supplier3'),
+    ('BURGER', 'Cheeseburger', '901234', 200, 380, 550, 'Burger Co.', 'Supplier4'),
+    ('PIZZA', 'Vegetarian Deluxe', '567890', 300, 550, 800, 'Pizza Co.', 'Supplier5'),
+    ('BURGER', 'Spicy Chicken Burger', '112233', 180, 320, 500, 'Burger Co.', 'Supplier6'),
+    ('SANDWICH', 'BLT Sandwich', '445566', 220, 400, 600, 'Sandwich Co.', 'Supplier7'),
+    ('PIZZA', 'Hawaiian Pizza', '778899', 320, 600, 900, 'Pizza Co.', 'Supplier8'),
+    ('SODA WATER', 'Cola', '990011', 120, 250, 400, 'Beverage Co.', 'Supplier9'),
+    ('BURGER', 'Fish Fillet Burger', '112233', 200, 350, 500, 'Burger Co.', 'Supplier10'),
+    ('PIZZA', 'Margherita Pizza', '334455', 280, 550, 750, 'Pizza Co.', 'Supplier11'),
+    ('SANDWICH', 'Turkey Club Sandwich', '556677', 250, 450, 650, 'Sandwich Co.', 'Supplier12'),
+    ('BURGER', 'Veggie Burger', '778899', 180, 320, 480, 'Burger Co.', 'Supplier13'),
+    ('PIZZA', 'Mushroom Lovers Pizza', '112233', 320, 600, 850, 'Pizza Co.', 'Supplier14'),
+    ('SODA WATER', 'Sprite', '334455', 130, 270, 400, 'Beverage Co.', 'Supplier15'),
+    ('BURGER', 'Bacon and Cheese Burger', '556677', 220, 380, 550, 'Burger Co.', 'Supplier16'),
+    ('PIZZA', 'BBQ Chicken Pizza', '778899', 300, 550, 800, 'Pizza Co.', 'Supplier17'),
+    ('SANDWICH', 'Chicken Caesar Wrap', '990011', 250, 420, 600, 'Sandwich Co.', 'Supplier18'),
+    ('BURGER', 'Double Bacon Burger', '112233', 280, 450, 550, 'Burger Co.', 'Supplier19'),
+    ('PIZZA', 'Pepperoni Pizza', '334455', 320, 620, 900, 'Pizza Co.', 'Supplier20'),
+    ('SODA WATER', 'Fanta', '556677', 130, 270, 400, 'Beverage Co.', 'Supplier21'),
+    ('BURGER', 'Classic Hamburger', '778899', 200, 350, 500, 'Burger Co.', 'Supplier22'),
+    ('PIZZA', 'Vegetarian Supreme', '990011', 280, 550, 750, 'Pizza Co.', 'Supplier23'),
+    ('SANDWICH', 'Egg Salad Sandwich', '112233', 220, 400, 550, 'Sandwich Co.', 'Supplier24'),
+    ('BURGER', 'Spicy Veggie Burger', '334455', 180, 320, 500, 'Burger Co.', 'Supplier25')
+     ''');
     await db.execute('''
     INSERT INTO Company (companyId,companyName,companyLogo) VALUES (
     '0',
