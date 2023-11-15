@@ -160,6 +160,20 @@ class DatabaseHelper {
     );
   }
 
+  Future<void> updateStock(int productId, bool isIncrement) async {
+    final db = await database;
+
+    if (isIncrement) {
+      await db!.rawUpdate(
+          'UPDATE Products SET stock = stock - 1 WHERE productId = ?',
+          [productId]);
+    } else {
+      await db!.rawUpdate(
+          'UPDATE Products SET stock = stock + 1 WHERE productId = ?',
+          [productId]);
+    }
+  }
+
   Future<void> changeQuantity(int orderId, bool decrement) async {
     final int newQuantity;
     if (decrement == false) {

@@ -5,17 +5,17 @@ import 'package:point_of_sale_app/database/order_item_model.dart';
 import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
 
 class PosTableWidget extends StatefulWidget {
-  PosTableWidget({Key? key, required this.reloadCallback}) : super(key: key);
+  PosTableWidget(
+      {super.key, required this.productsData, required this.reloadCallback});
 
   final Function reloadCallback;
+  List<Map<String, dynamic>> productsData = [];
 
   @override
   _PosTableWidgetState createState() => _PosTableWidgetState();
 }
 
 class _PosTableWidgetState extends State<PosTableWidget> {
-  List<Map<String, dynamic>> productsData = [];
-
   @override
   void initState() {
     super.initState();
@@ -26,8 +26,9 @@ class _PosTableWidgetState extends State<PosTableWidget> {
     final database = await DatabaseHelper.instance.database;
     final result = await database?.query('Products');
     setState(() {
-      productsData = result!;
+      widget.productsData = result!;
     });
+    print('Product _loadData()');
   }
 
   @override
@@ -45,7 +46,7 @@ class _PosTableWidgetState extends State<PosTableWidget> {
               DataColumn(label: Text('Stock')),
               DataColumn(label: Text('')),
             ],
-            rows: productsData.map<DataRow>((Map<String, dynamic> row) {
+            rows: widget.productsData.map<DataRow>((Map<String, dynamic> row) {
               return DataRow(
                 cells: [
                   DataCell(Text(row['productId'].toString())),
@@ -69,8 +70,6 @@ class _PosTableWidgetState extends State<PosTableWidget> {
                         if (productCount! < 1) {
                           await DatabaseHelper.instance.insertRecord(
                               'OrderItems', orderItemModel.toMap());
-
-                          // print('curr=${orderSelectionKey.currentState}');
 
                           widget.reloadCallback(); // Trigger reload
 

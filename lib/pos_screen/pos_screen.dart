@@ -13,6 +13,7 @@ class PosScreen extends StatefulWidget {
 }
 
 class _PosScreenState extends State<PosScreen> {
+  List<Map<String, dynamic>> orderProducts = [];
   List<Map<String, dynamic>> productsData = [];
 
   @override
@@ -37,18 +38,39 @@ class _PosScreenState extends State<PosScreen> {
             children: [
               SingleChildScrollView(
                 child: PosTableWidget(
+                  productsData: productsData,
                   reloadCallback: () async {
                     final database = await DatabaseHelper.instance.database;
                     final result = await database?.query('OrderItems');
+                    // print('ress=$result');
                     setState(() {
-                      productsData = result!;
+                      orderProducts = result!;
                     });
+                    print('reloadCallback()');
                   },
                 ),
               ),
               SingleChildScrollView(
                 child: Column(
-                  children: [OrderSelection(orderItems: productsData)],
+                  children: [
+                    OrderSelection(
+                      orderItems: orderProducts,
+                      quantityCallback: (int prodID, bool isIncrement) async {
+                        await DatabaseHelper.instance
+                            .updateStock(prodID, isIncrement);
+                        print('$isIncrement, ID=$prodID');
+
+                        final database = await DatabaseHelper.instance.database;
+                        final result = await database?.query('Products');
+                        // print('ress=$result');
+                        setState(() {
+                          productsData = result!;
+                          print('set state from quantityCallBack()');
+                        });
+                        print('quantityCallBack()');
+                      },
+                    )
+                  ],
                 ),
               )
             ],
