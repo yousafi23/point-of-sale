@@ -6,12 +6,13 @@ import 'package:point_of_sale_app/company_settings.dart';
 import 'package:point_of_sale_app/database/company_model.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/login_screen.dart';
+import 'package:point_of_sale_app/order_view_screen.dart';
 import 'package:point_of_sale_app/pos_screen/pos_screen.dart';
 
 class ReusableDrawer extends StatelessWidget {
   final String title;
   final Widget currentPage;
-  
+
   const ReusableDrawer({
     Key? key,
     required this.title,
@@ -64,6 +65,10 @@ class ReusableDrawer extends StatelessWidget {
           createDrawerItem(
             title: 'Users',
             page: const UsersScreen(),
+          ),
+          createDrawerItem(
+            title: 'Orders',
+            page: OrderViewScreen(),
           ),
           createDrawerItem(
             title: 'Company Settings',

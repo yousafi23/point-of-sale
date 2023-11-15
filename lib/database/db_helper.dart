@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:point_of_sale_app/database/company_model.dart';
+import 'package:point_of_sale_app/database/order_model.dart';
 import 'package:point_of_sale_app/database/user_model.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -174,6 +175,14 @@ class DatabaseHelper {
       where: 'orderItemId = ?',
       whereArgs: [orderId],
     );
+  }
+
+  Future<List<OrderModel>?> getAllOrders() async {
+    final db = await database;
+    final result = await db?.query('Orders');
+    return result?.map((jsonOrder) {
+      return OrderModel.fromJson(jsonOrder);
+    }).toList();
   }
 
   Future<List<Map<String, Object?>>?> getRecord(

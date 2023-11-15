@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/database/order_model.dart';
@@ -120,7 +122,7 @@ class _OrderSelectionState extends State<OrderSelection> {
             OrderModel orderModel = OrderModel(
                 orderDate: DateTime.now(),
                 grandTotal: grandTotal,
-                orderItemsList: widget.orderItems.toString());
+                orderItemsList: jsonEncode(widget.orderItems));
 
             // print('Model=${orderModel.toMap()}');
             // print('str=${widget.orderItems}');

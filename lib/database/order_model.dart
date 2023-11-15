@@ -5,10 +5,13 @@ class OrderModel {
   final DateTime orderDate;
   final double grandTotal;
   final String orderItemsList;
+  final int? orderId;
+
   OrderModel({
     required this.orderDate,
     required this.grandTotal,
     required this.orderItemsList,
+    this.orderId,
   });
 
   OrderModel copyWith({
@@ -41,8 +44,17 @@ class OrderModel {
 
   String toJson() => json.encode(toMap());
 
-  factory OrderModel.fromJson(String source) =>
-      OrderModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  // factory OrderModel.fromJson(String source) =>
+  //     OrderModel.fromMap(json.decode(source) as Map<String, dynamic>);
+
+  factory OrderModel.fromJson(Map<String, dynamic> json) {
+    return OrderModel(
+      orderId: json['orderId'],
+      orderDate: DateTime.parse(json['orderDate']),
+      grandTotal: json['grandTotal'],
+      orderItemsList: json['orderItemsList'],
+    );
+  }
 
   @override
   String toString() =>
