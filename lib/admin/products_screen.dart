@@ -16,11 +16,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const ReusableDrawer(
-        title: 'Home',
+        title: 'Products',
         currentPage: ProductsScreen(),
       ),
       appBar: myCustomAppBar(
-        "Admin panel",
+        "Products",
         const Color.fromARGB(255, 116, 2, 122),
       ),
       body: Container(
