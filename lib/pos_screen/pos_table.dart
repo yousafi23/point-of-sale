@@ -37,6 +37,7 @@ class _PosTableWidgetState extends State<PosTableWidget> {
         Padding(
           padding: const EdgeInsets.only(top: 15.0),
           child: DataTable(
+            columnSpacing: 30.0,
             columns: const [
               DataColumn(label: Text('ID')),
               DataColumn(label: Text('Name')),
@@ -49,7 +50,12 @@ class _PosTableWidgetState extends State<PosTableWidget> {
               return DataRow(
                 cells: [
                   DataCell(Text(row['productId'].toString())),
-                  DataCell(Text(row['prodName'])),
+                  DataCell(SizedBox(
+                      width: 100,
+                      child: Text(
+                        row['prodName'],
+                        maxLines: 2,
+                      ))),
                   DataCell(Text(row['barCode'].toString())),
                   DataCell(Text(row['unitPrice'].toString())),
                   DataCell(Text(row['stock'].toString())),

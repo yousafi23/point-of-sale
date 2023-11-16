@@ -57,59 +57,67 @@ class _OrderViewScreenState extends State<OrderViewScreen> {
         "Orders",
         const Color.fromARGB(255, 2, 122, 4),
       ),
-      body: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 350.0, // maximum width
-          mainAxisSpacing: 10.0,
-          crossAxisSpacing: 10.0,
-          childAspectRatio: 1.0,
-        ),
-        itemCount: _orders.length,
-        itemBuilder: (context, index) {
-          final order = _orders[index];
-          List<Map<String, dynamic>> orderItemsList =
-              List<Map<String, dynamic>>.from(jsonDecode(order.orderItemsList));
+      body: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: GridView.builder(
+          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+            // crossAxisCount: 4,
+            maxCrossAxisExtent: 350.0, // maximum width
+            mainAxisSpacing: 10.0,
+            crossAxisSpacing: 10.0,
+            // childAspectRatio: 1,
+          ),
+          itemCount: _orders.length,
+          itemBuilder: (context, index) {
+            final order = _orders[index];
+            List<Map<String, dynamic>> orderItemsList =
+                List<Map<String, dynamic>>.from(
+                    jsonDecode(order.orderItemsList));
 
-          return Card(
-            elevation: 5,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('ID : ${order.orderId}',
-                          style: const TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.bold)),
-                      Text(DateFormat('EEE, dd-MMM-yy \n h:mm a')
-                          .format(order.orderDate)),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Column(
-                    children: orderItemsList.map((item) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('${item['prodName']}'),
-                          Text(
-                            '${item['price']} x ${item['quantity']} = ${item['price'] * item['quantity']}',
-                          ),
-                        ],
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 10),
-                  Text('= ${order.grandTotal.toString()}',
-                      style: const TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.bold)),
-                ],
+            return Card(
+              elevation: 3,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+              color: Colors.green.shade100,
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('ID : ${order.orderId}',
+                            style: const TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.bold)),
+                        Text(DateFormat('EEE, dd-MMM-yy \n h:mm a')
+                            .format(order.orderDate)),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Column(
+                      children: orderItemsList.map((item) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('${item['prodName']}'),
+                            Text(
+                              '${item['price']} x ${item['quantity']} = ${item['price'] * item['quantity']}',
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 10),
+                    Text('= ${order.grandTotal.toString()}',
+                        style: const TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold)),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

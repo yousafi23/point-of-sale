@@ -47,6 +47,7 @@ class _OrderSelectionState extends State<OrderSelection> {
     return Column(
       children: [
         DataTable(
+          columnSpacing: 30.0,
           columns: const [
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Unit Price')),
@@ -59,7 +60,12 @@ class _OrderSelectionState extends State<OrderSelection> {
           rows: widget.orderItems.map<DataRow>((Map<String, dynamic> row) {
             return DataRow(
               cells: [
-                DataCell(Text(row['prodName'])),
+                DataCell(SizedBox(
+                    width: 100,
+                    child: Text(
+                      row['prodName'],
+                      maxLines: 2,
+                    ))),
                 DataCell(Text(row['price'].toString())),
                 DataCell(Text(row['quantity'].toString())),
                 DataCell(Text((row['quantity'] * row['price']).toString())),
