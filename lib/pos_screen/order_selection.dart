@@ -8,7 +8,10 @@ import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
 
 // ignore: must_be_immutable
 class OrderSelection extends StatefulWidget {
-  OrderSelection({super.key, required this.orderItems});
+  OrderSelection(
+      {super.key, required this.orderItems, required this.quantityCallback});
+
+  final Function quantityCallback;
   List<Map<String, dynamic>> orderItems;
 
   @override
@@ -31,10 +34,11 @@ class _OrderSelectionState extends State<OrderSelection> {
     setState(() {
       widget.orderItems = result!;
       calculateGrandTotal();
+      print('set from order');
     });
+    print('Order _loadData()');
   }
 
-  // Add this function to calculate the grand total
   void calculateGrandTotal() {
     grandTotal = widget.orderItems.fold<double>(0.0, (sum, item) {
       return sum + (item['quantity'] * item['price']);
@@ -55,7 +59,7 @@ class _OrderSelectionState extends State<OrderSelection> {
             DataColumn(label: Text('Total')),
             DataColumn(label: Text('')),
             DataColumn(label: Text('')),
-            DataColumn(label: Text('')),
+            // DataColumn(label: Text('')),
           ],
           rows: widget.orderItems.map<DataRow>((Map<String, dynamic> row) {
             return DataRow(
@@ -76,7 +80,11 @@ class _OrderSelectionState extends State<OrderSelection> {
                       await DatabaseHelper.instance
                           .changeQuantity(row['orderItemId'], false);
 
-                      _loadData();
+                      await widget.quantityCallback(
+                          row['productId'], true); //triger
+                      print('add btn');
+
+                      await _loadData();
                     },
                   ),
                 ),
@@ -90,11 +98,24 @@ class _OrderSelectionState extends State<OrderSelection> {
                         if (qty > 1) {
                           await DatabaseHelper.instance
                               .changeQuantity(row['orderItemId'], true);
+
+                          print('before=${widget.orderItems.length}');
+
+                          await widget.quantityCallback(
+                              row['productId'], false); //triger
+
+                          print('after=${widget.orderItems.length}');
+
+                          print('min btn');
                         } else {
                           await DatabaseHelper.instance.deleteRecord(
                               dbTable: "OrderItems",
                               where: 'orderItemId=?',
                               id: row['orderItemId']);
+
+                          await widget.quantityCallback(
+                              row['productId'], false); //triger
+                          print('deleted');
 
                           ScaffoldMessenger.of(context).showSnackBar(
                               myCustomSnackBar(
@@ -102,27 +123,32 @@ class _OrderSelectionState extends State<OrderSelection> {
                         }
 
                         await _loadData();
+                        // print('loaded aft del/min');
                       }),
                 ),
-                DataCell(
-                  GestureDetector(
-                    child: const Icon(Icons.delete,
-                        color: Color.fromARGB(255, 255, 0, 0)),
-                    onTap: () async {
-                      await DatabaseHelper.instance.deleteRecord(
-                          dbTable: "OrderItems",
-                          where: 'orderItemId=?',
-                          id: row['orderItemId']);
-                      await _loadData();
-                    },
-                  ),
-                ),
+                // DataCell(
+                //   GestureDetector(
+                //     child: const Icon(Icons.delete,
+                //         color: Color.fromARGB(255, 255, 0, 0)),
+                //     onTap: () async {
+                //       await DatabaseHelper.instance.deleteRecord(
+                //           dbTable: "OrderItems",
+                //           where: 'orderItemId=?',
+                //           id: row['orderItemId']);
+                //       await _loadData();
+                //     },
+                //   ),
+                // ),
               ],
             );
           }).toList(),
         ),
-        Text('Grand Total:\t\t\tRs ${grandTotal.toStringAsFixed(1)}',
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        Padding(
+          padding: const EdgeInsets.all(18.0),
+          child: Text('Grand Total:\t\t\tRs ${grandTotal.toStringAsFixed(1)}',
+              style:
+                  const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        ),
         FloatingActionButton.extended(
           onPressed: () async {
             OrderModel orderModel = OrderModel(
@@ -137,11 +163,12 @@ class _OrderSelectionState extends State<OrderSelection> {
               await DatabaseHelper.instance
                   .insertRecord('Orders', orderModel.toMap());
               await DatabaseHelper.instance.truncateTable('OrderItems');
+
+              ScaffoldMessenger.of(context).showSnackBar(myCustomSnackBar(
+                message: 'Order Placed!\t\t\t\t Total: $grandTotal',
+                warning: false,
+              ));
             }
-            ScaffoldMessenger.of(context).showSnackBar(myCustomSnackBar(
-              message: 'Order Placed!\t\t\t\t Total: $grandTotal',
-              warning: false,
-            ));
 
             await _loadData();
           },
