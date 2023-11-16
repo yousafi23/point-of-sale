@@ -4,12 +4,13 @@ import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/database/order_item_model.dart';
 import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
 
+// ignore: must_be_immutable
 class PosTableWidget extends StatefulWidget {
   PosTableWidget(
       {super.key, required this.productsData, required this.reloadCallback});
 
   final Function reloadCallback;
-  List<Map<String, dynamic>> productsData = [];
+  List<Map<String, dynamic>> productsData;
 
   @override
   _PosTableWidgetState createState() => _PosTableWidgetState();
@@ -33,6 +34,7 @@ class _PosTableWidgetState extends State<PosTableWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print("products count:${widget.productsData.length}");
     return Column(
       children: [
         Padding(
@@ -70,6 +72,8 @@ class _PosTableWidgetState extends State<PosTableWidget> {
                         if (productCount! < 1) {
                           await DatabaseHelper.instance.insertRecord(
                               'OrderItems', orderItemModel.toMap());
+                          await DatabaseHelper.instance
+                              .updateStock(row['productId'], true);
 
                           widget.reloadCallback(); // Trigger reload
 

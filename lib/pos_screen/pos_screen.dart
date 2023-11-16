@@ -42,8 +42,11 @@ class _PosScreenState extends State<PosScreen> {
                   reloadCallback: () async {
                     final database = await DatabaseHelper.instance.database;
                     final result = await database?.query('OrderItems');
+                    final result2 = await database?.query('Products');
+
                     // print('ress=$result');
                     setState(() {
+                      productsData = result2!;
                       orderProducts = result!;
                     });
                     print('reloadCallback()');
@@ -62,8 +65,11 @@ class _PosScreenState extends State<PosScreen> {
 
                         final database = await DatabaseHelper.instance.database;
                         final result = await database?.query('Products');
+                        final result2 = await database?.query('OrderItems');
+
                         // print('ress=$result');
                         setState(() {
+                          orderProducts = result2!;
                           productsData = result!;
                           print('set state from quantityCallBack()');
                         });
