@@ -60,7 +60,7 @@ class _OrderViewScreenState extends State<OrderViewScreen> {
       body: Padding(
         padding: const EdgeInsets.all(15.0),
         child: GridView.builder(
-          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
             // crossAxisCount: 4,
             maxCrossAxisExtent: 350.0, // maximum width
             mainAxisSpacing: 10.0,
@@ -90,7 +90,7 @@ class _OrderViewScreenState extends State<OrderViewScreen> {
                         Text('ID : ${order.orderId}',
                             style: const TextStyle(
                                 fontSize: 15, fontWeight: FontWeight.bold)),
-                        Text(DateFormat('EEE, dd-MMM-yy \n h:mm a')
+                        Text(DateFormat('EEE, dd-MMM-yy\nh:mm a')
                             .format(order.orderDate)),
                       ],
                     ),

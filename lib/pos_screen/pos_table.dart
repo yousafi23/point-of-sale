@@ -29,12 +29,12 @@ class _PosTableWidgetState extends State<PosTableWidget> {
     setState(() {
       widget.productsData = result!;
     });
-    print('Product _loadData()');
+    // print('Product _loadData()');
   }
 
   @override
   Widget build(BuildContext context) {
-    print("products count:${widget.productsData.length}");
+    // print("products count:${widget.productsData.length}");
     return Column(
       children: [
         Padding(

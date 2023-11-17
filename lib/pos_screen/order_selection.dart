@@ -34,9 +34,9 @@ class _OrderSelectionState extends State<OrderSelection> {
     setState(() {
       widget.orderItems = result!;
       calculateGrandTotal();
-      print('set from order');
+      // print('set from order');
     });
-    print('Order _loadData()');
+    // print('Order _loadData()');
   }
 
   void calculateGrandTotal() {
@@ -82,7 +82,7 @@ class _OrderSelectionState extends State<OrderSelection> {
 
                       await widget.quantityCallback(
                           row['productId'], true); //triger
-                      print('add btn');
+                      // print('add btn');
 
                       await _loadData();
                     },
@@ -99,14 +99,14 @@ class _OrderSelectionState extends State<OrderSelection> {
                           await DatabaseHelper.instance
                               .changeQuantity(row['orderItemId'], true);
 
-                          print('before=${widget.orderItems.length}');
+                          // print('before=${widget.orderItems.length}');
 
                           await widget.quantityCallback(
                               row['productId'], false); //triger
 
-                          print('after=${widget.orderItems.length}');
+                          // print('after=${widget.orderItems.length}');
 
-                          print('min btn');
+                          // print('min btn');
                         } else {
                           await DatabaseHelper.instance.deleteRecord(
                               dbTable: "OrderItems",
@@ -115,7 +115,7 @@ class _OrderSelectionState extends State<OrderSelection> {
 
                           await widget.quantityCallback(
                               row['productId'], false); //triger
-                          print('deleted');
+                          // print('deleted');
 
                           ScaffoldMessenger.of(context).showSnackBar(
                               myCustomSnackBar(
@@ -151,26 +151,32 @@ class _OrderSelectionState extends State<OrderSelection> {
         ),
         FloatingActionButton.extended(
           onPressed: () async {
-            OrderModel orderModel = OrderModel(
-                orderDate: DateTime.now(),
-                grandTotal: grandTotal,
-                orderItemsList: jsonEncode(widget.orderItems));
+            if (grandTotal > 0) {
+              OrderModel orderModel = OrderModel(
+                  orderDate: DateTime.now(),
+                  grandTotal: grandTotal,
+                  orderItemsList: jsonEncode(widget.orderItems));
 
-            // print('Model=${orderModel.toMap()}');
-            // print('str=${widget.orderItems}');
-            final bool confirmed = await showPlaceOrderConfirmation(context);
-            if (confirmed) {
-              await DatabaseHelper.instance
-                  .insertRecord('Orders', orderModel.toMap());
-              await DatabaseHelper.instance.truncateTable('OrderItems');
+              // print('Model=${orderModel.toMap()}');
+              // print('str=${widget.orderItems}');
+              final bool confirmed = await showPlaceOrderConfirmation(context);
+              if (confirmed) {
+                await DatabaseHelper.instance
+                    .insertRecord('Orders', orderModel.toMap());
+                await DatabaseHelper.instance.truncateTable('OrderItems');
 
+                ScaffoldMessenger.of(context).showSnackBar(myCustomSnackBar(
+                  message: 'Order Placed!\t\t\t\t Total: $grandTotal',
+                  warning: false,
+                ));
+              }
+              await _loadData();
+            } else {
               ScaffoldMessenger.of(context).showSnackBar(myCustomSnackBar(
-                message: 'Order Placed!\t\t\t\t Total: $grandTotal',
-                warning: false,
+                message: 'Can NOT place empty Order!',
+                warning: true,
               ));
             }
-
-            await _loadData();
           },
           label: const Text('Place Order'),
         )

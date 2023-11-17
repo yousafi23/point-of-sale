@@ -193,7 +193,7 @@ class DatabaseHelper {
 
   Future<List<OrderModel>?> getAllOrders() async {
     final db = await database;
-    final result = await db?.query('Orders');
+    final result = await db?.query('Orders', orderBy: 'orderDate DESC');
     return result?.map((jsonOrder) {
       return OrderModel.fromJson(jsonOrder);
     }).toList();

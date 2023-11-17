@@ -49,7 +49,7 @@ class _PosScreenState extends State<PosScreen> {
                       productsData = result2!;
                       orderProducts = result!;
                     });
-                    print('reloadCallback()');
+                    // print('reloadCallback()');
                   },
                 ),
               ),
@@ -61,7 +61,7 @@ class _PosScreenState extends State<PosScreen> {
                       quantityCallback: (int prodID, bool isIncrement) async {
                         await DatabaseHelper.instance
                             .updateStock(prodID, isIncrement);
-                        print('$isIncrement, ID=$prodID');
+                        // print('$isIncrement, ID=$prodID');
 
                         final database = await DatabaseHelper.instance.database;
                         final result = await database?.query('Products');
@@ -71,9 +71,9 @@ class _PosScreenState extends State<PosScreen> {
                         setState(() {
                           orderProducts = result2!;
                           productsData = result!;
-                          print('set state from quantityCallBack()');
+                          // print('set state from quantityCallBack()');
                         });
-                        print('quantityCallBack()');
+                        // print('quantityCallBack()');
                       },
                     )
                   ],
