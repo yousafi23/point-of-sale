@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -97,10 +99,10 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
 
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => const ProductsScreen()));
-                  ScaffoldMessenger.of(context).showSnackBar(myCustomSnackBar(
-                    message: 'Company settings Saved',
-                    warning: false,
-                  ));
+                  myCustomSnackBar(
+                      message: 'Company settings Saved',
+                      warning: false,
+                      context: context);
                 },
                 child: const Text('Save'),
                 style: ElevatedButton.styleFrom(

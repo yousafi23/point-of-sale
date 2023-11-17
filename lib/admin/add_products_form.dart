@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/admin/products_screen.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
@@ -225,12 +227,10 @@ class _AddProductState extends State<AddProduct> {
                         widget.sizeIds![i] as int);
                     // print('Final= ${sizeModel.toString()}');
                   }
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    myCustomSnackBar(
+                  myCustomSnackBar(
                       message: 'Product Updated: ${productModel.prodName}',
                       warning: false,
-                    ),
-                  );
+                      context: context);
                 } else {
                   var prodId = await DatabaseHelper.instance
                       .insertRecord('Products', productModel.toMap());
@@ -247,12 +247,10 @@ class _AddProductState extends State<AddProduct> {
                         .insertRecord('Size', sizeModel.toMap());
                   }
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    myCustomSnackBar(
+                  myCustomSnackBar(
                       message: 'Product Added: ${productModel.prodName}',
                       warning: false,
-                    ),
-                  );
+                      context: context);
                 }
 
                 Navigator.of(context).push(MaterialPageRoute(

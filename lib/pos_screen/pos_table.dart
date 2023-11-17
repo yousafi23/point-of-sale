@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 
 import 'package:point_of_sale_app/database/db_helper.dart';
@@ -83,15 +85,15 @@ class _PosTableWidgetState extends State<PosTableWidget> {
 
                           widget.reloadCallback(); // Trigger reload
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              myCustomSnackBar(
-                                  message: '${row['prodName']} Added',
-                                  warning: false));
+                          myCustomSnackBar(
+                              message: '${row['prodName']} Added',
+                              warning: false,
+                              context: context);
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              myCustomSnackBar(
-                                  message: 'Product Already in Order List!',
-                                  warning: true));
+                          myCustomSnackBar(
+                              message: 'Product Already in Order List!',
+                              warning: true,
+                              context: context);
                         }
                       },
                     ),

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -117,9 +119,10 @@ class _OrderSelectionState extends State<OrderSelection> {
                               row['productId'], false); //triger
                           // print('deleted');
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              myCustomSnackBar(
-                                  message: 'Product Removed', warning: true));
+                          myCustomSnackBar(
+                              message: 'Product Removed',
+                              warning: true,
+                              context: context);
                         }
 
                         await _loadData();
@@ -165,17 +168,19 @@ class _OrderSelectionState extends State<OrderSelection> {
                     .insertRecord('Orders', orderModel.toMap());
                 await DatabaseHelper.instance.truncateTable('OrderItems');
 
-                ScaffoldMessenger.of(context).showSnackBar(myCustomSnackBar(
+                myCustomSnackBar(
                   message: 'Order Placed!\t\t\t\t Total: $grandTotal',
                   warning: false,
-                ));
+                  context: context,
+                );
               }
               await _loadData();
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(myCustomSnackBar(
+              myCustomSnackBar(
                 message: 'Can NOT place empty Order!',
                 warning: true,
-              ));
+                context: context,
+              );
             }
           },
           label: const Text('Place Order'),

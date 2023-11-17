@@ -98,11 +98,10 @@ class LoginScreen extends StatelessWidget {
 
                           if (user != null) {
                             if (user.isAdmin) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                myCustomSnackBar(
-                                  message: 'Admin LogIn: ${user.name}',
-                                  warning: false,
-                                ),
+                              myCustomSnackBar(
+                                message: 'Admin LogIn: ${user.name}',
+                                warning: false,
+                                context: context,
                               );
                               Navigator.push(
                                 context,
@@ -111,12 +110,10 @@ class LoginScreen extends StatelessWidget {
                                 ),
                               );
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                myCustomSnackBar(
+                              myCustomSnackBar(
                                   message: 'User LogIn: ${user.name}',
                                   warning: false,
-                                ),
-                              );
+                                  context: context);
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -125,12 +122,10 @@ class LoginScreen extends StatelessWidget {
                               );
                             }
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              myCustomSnackBar(
+                            myCustomSnackBar(
                                 message: 'Wrong Password Or Username',
                                 warning: true,
-                              ),
-                            );
+                                context: context);
                           }
                         },
                         child: const Text('Login'),
