@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously, must_be_immutable
+// ignore_for_file: use_build_context_synchronously, must_be_immutable, library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
@@ -47,7 +47,7 @@ class _PosTableWidgetState extends State<PosTableWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width * .4,
       child: SingleChildScrollView(
         child: Column(
