@@ -83,7 +83,10 @@ class DatabaseHelper {
     CREATE TABLE Company (
       companyId INTEGER PRIMARY KEY AUTOINCREMENT,
       companyName TEXT,
-      companyLogo BLOB
+      companyLogo BLOB,
+      serviceCharges INT,
+      gst INT,
+      discount INT
     ) ''');
     await db.execute('''
     INSERT INTO Users (userId,name,userName,password,isAdmin)

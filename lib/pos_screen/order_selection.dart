@@ -22,7 +22,13 @@ class OrderSelection extends StatefulWidget {
 
 class _OrderSelectionState extends State<OrderSelection> {
   double grandTotal = 0.0;
+  double total = 0.0;
+  double gstAmount = 0.0;
+  double discountAmount = 0.0;
   int orderItemId = 0;
+  int serviceCharges = 0;
+  int gst = 0;
+  int discount = 0;
 
   @override
   void initState() {
@@ -33,18 +39,39 @@ class _OrderSelectionState extends State<OrderSelection> {
   Future<void> _loadData() async {
     final database = await DatabaseHelper.instance.database;
     final result = await database?.query('OrderItems');
+    final result1 =
+        await DatabaseHelper.instance.getRecord('Company', 'companyId=?', 0);
+
     setState(() {
       widget.orderItems = result!;
       calculateGrandTotal();
-      // print('set from order');
+      serviceCharges = result1![0]['serviceCharges'] as int;
+      gst = result1[0]['gst'] as int;
+      discount = result1[0]['discount'] as int;
     });
     // print('Order _loadData()');
   }
 
+  // Future<void> calculateGrandTotal() async {
+  //   grandTotal = widget.orderItems.fold<double>(0.0, (sum, item) {
+  //     return sum + (item['quantity'] * item['price']);
+  //   });
+  // }
+
   void calculateGrandTotal() {
-    grandTotal = widget.orderItems.fold<double>(0.0, (sum, item) {
-      return sum + (item['quantity'] * item['price']);
-    });
+    grandTotal = 0.0;
+    total = 0.0;
+
+    // Iterate through each order item and update grandTotal
+    for (var item in widget.orderItems) {
+      int itemTotal =
+          item['quantity'] * item['price']; // Calculate total for each item
+      total += itemTotal; // Add item total to grandTotal
+    }
+
+    gstAmount = total * (gst / 100);
+    discountAmount = total * (discount / 100);
+    grandTotal = total + serviceCharges + gstAmount - discountAmount;
   }
 
   @override
@@ -148,13 +175,41 @@ class _OrderSelectionState extends State<OrderSelection> {
         ),
         Padding(
           padding: const EdgeInsets.all(18.0),
-          child: Text('Grand Total:\t\t\tRs ${grandTotal.toStringAsFixed(1)}',
-              style:
-                  const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          child: Row(
+            children: [
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Total'),
+                  Text('Service Charges'),
+                  Text('GST'),
+                  Text('Discount'),
+                  Text('Grand Total',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 30.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('Rs ${total.toString()}'),
+                    Text('Rs ${serviceCharges.toString()}'),
+                    Text('$gst% =  ${gstAmount.toStringAsFixed(1)}'),
+                    Text('$discount%  = ${discountAmount.toStringAsFixed(1)}'),
+                    Text('Rs ${grandTotal.toStringAsFixed(1)}',
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
         FloatingActionButton.extended(
           onPressed: () async {
-            if (grandTotal > 0) {
+            if (total > 0) {
               OrderModel orderModel = OrderModel(
                   orderDate: DateTime.now(),
                   grandTotal: grandTotal,
@@ -169,7 +224,8 @@ class _OrderSelectionState extends State<OrderSelection> {
                 await DatabaseHelper.instance.truncateTable('OrderItems');
 
                 myCustomSnackBar(
-                  message: 'Order Placed!\t\t\t\t Total: $grandTotal',
+                  message:
+                      'Order Placed!\t\t\t\t Total: ${grandTotal.toStringAsFixed(1)}',
                   warning: false,
                   context: context,
                 );
