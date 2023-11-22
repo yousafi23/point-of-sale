@@ -71,6 +71,8 @@ class _OrderSelectionState extends State<OrderSelection> {
     gstAmount = total * (gst / 100);
     discountAmount = total * (discount / 100);
     grandTotal = total + serviceCharges + gstAmount - discountAmount;
+    
+    grandTotal = double.parse(grandTotal.toStringAsFixed(1));
     setState(() {});
   }
 
@@ -259,7 +261,11 @@ class _OrderSelectionState extends State<OrderSelection> {
               OrderModel orderModel = OrderModel(
                   orderDate: DateTime.now(),
                   grandTotal: grandTotal,
-                  orderItemsList: jsonEncode(widget.orderItems));
+                  orderItemsList: jsonEncode(widget.orderItems),
+                  total: total,
+                  serviceCharges: serviceCharges,
+                  gstPercent: gst,
+                  discountPercent: discount);
 
               // print('Model=${orderModel.toMap()}');
               // print('str=${widget.orderItems}');

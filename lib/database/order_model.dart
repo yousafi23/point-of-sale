@@ -6,31 +6,31 @@ class OrderModel {
   final double grandTotal;
   final String orderItemsList;
   final int? orderId;
+  final double total;
+  final int serviceCharges;
+  final int gstPercent;
+  final int discountPercent;
 
   OrderModel({
     required this.orderDate,
     required this.grandTotal,
     required this.orderItemsList,
     this.orderId,
+    required this.total,
+    required this.serviceCharges,
+    required this.gstPercent,
+    required this.discountPercent,
   });
-
-  OrderModel copyWith({
-    DateTime? orderDate,
-    double? grandTotal,
-    String? orderItemsList,
-  }) {
-    return OrderModel(
-      orderDate: orderDate ?? this.orderDate,
-      grandTotal: grandTotal ?? this.grandTotal,
-      orderItemsList: orderItemsList ?? this.orderItemsList,
-    );
-  }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'orderDate': orderDate.toString(),
       'grandTotal': grandTotal,
       'orderItemsList': orderItemsList,
+      'total': total,
+      'serviceCharges': serviceCharges,
+      'gstPercent': gstPercent,
+      'discountPercent': discountPercent
     };
   }
 
@@ -39,6 +39,10 @@ class OrderModel {
       orderDate: map['orderDate'],
       grandTotal: map['grandTotal'] as double,
       orderItemsList: map['orderItemsList'] as String,
+      total: map['total'],
+      serviceCharges: map['serviceCharges'],
+      gstPercent: map['gstPercent'],
+      discountPercent: map['discountPercent'],
     );
   }
 
@@ -53,23 +57,10 @@ class OrderModel {
       orderDate: DateTime.parse(json['orderDate']),
       grandTotal: json['grandTotal'],
       orderItemsList: json['orderItemsList'],
+      total: json['total'],
+      serviceCharges: json['serviceCharges'],
+      gstPercent: json['gstPercent'],
+      discountPercent: json['discountPercent'],
     );
   }
-
-  @override
-  String toString() =>
-      'OrderModel(orderDate: $orderDate, grandTotal: $grandTotal, orderItemsList: $orderItemsList)';
-
-  @override
-  bool operator ==(covariant OrderModel other) {
-    if (identical(this, other)) return true;
-
-    return other.orderDate == orderDate &&
-        other.grandTotal == grandTotal &&
-        other.orderItemsList == orderItemsList;
-  }
-
-  @override
-  int get hashCode =>
-      orderDate.hashCode ^ grandTotal.hashCode ^ orderItemsList.hashCode;
 }

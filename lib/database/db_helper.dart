@@ -61,7 +61,11 @@ class DatabaseHelper {
       orderId INTEGER PRIMARY KEY AUTOINCREMENT,
       orderDate DATETIME,
       grandTotal DOUBLE,
-      orderItemsList TEXT
+      orderItemsList TEXT,
+      total DOUBLE,
+      serviceCharges INT,
+      gstPercent INT,
+      discountPercent INT
     )''');
     await db.execute('''
     CREATE TABLE Size (
@@ -194,9 +198,10 @@ class DatabaseHelper {
     );
   }
 
-  Future<List<OrderModel>?> getAllOrders() async {
+  Future<List<OrderModel>?> getlatest12Orders() async {
     final db = await database;
-    final result = await db?.query('Orders', orderBy: 'orderDate DESC');
+    final result =
+        await db?.query('Orders', orderBy: 'orderDate DESC', limit: 12);
     return result?.map((jsonOrder) {
       return OrderModel.fromJson(jsonOrder);
     }).toList();
