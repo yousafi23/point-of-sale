@@ -29,6 +29,11 @@ class _OrderSelectionState extends State<OrderSelection> {
   int serviceCharges = 0;
   int gst = 0;
   int discount = 0;
+  // final discount = TextEditingController();
+  final discountCont = TextEditingController();
+  final serviceChargesCont = TextEditingController();
+
+  // int discount = int.parse(discountCont.text);
 
   @override
   void initState() {
@@ -41,7 +46,6 @@ class _OrderSelectionState extends State<OrderSelection> {
     final result = await database?.query('OrderItems');
     final result1 =
         await DatabaseHelper.instance.getRecord('Company', 'companyId=?', 0);
-
     setState(() {
       widget.orderItems = result!;
       calculateGrandTotal();
@@ -49,7 +53,8 @@ class _OrderSelectionState extends State<OrderSelection> {
       gst = result1[0]['gst'] as int;
       discount = result1[0]['discount'] as int;
     });
-    // print('Order _loadData()');
+    discountCont.text = discount.toString();
+    serviceChargesCont.text = serviceCharges.toString();
   }
 
   void calculateGrandTotal() {
@@ -66,6 +71,7 @@ class _OrderSelectionState extends State<OrderSelection> {
     gstAmount = total * (gst / 100);
     discountAmount = total * (discount / 100);
     grandTotal = total + serviceCharges + gstAmount - discountAmount;
+    setState(() {});
   }
 
   @override
@@ -82,7 +88,6 @@ class _OrderSelectionState extends State<OrderSelection> {
             DataColumn(label: Text('Total')),
             DataColumn(label: Text('')),
             DataColumn(label: Text('')),
-            // DataColumn(label: Text('')),
           ],
           rows: widget.orderItems.map<DataRow>((Map<String, dynamic> row) {
             return DataRow(
@@ -150,55 +155,102 @@ class _OrderSelectionState extends State<OrderSelection> {
                         // print('loaded aft del/min');
                       }),
                 ),
-                // DataCell(
-                //   GestureDetector(
-                //     child: const Icon(Icons.delete,
-                //         color: Color.fromARGB(255, 255, 0, 0)),
-                //     onTap: () async {
-                //       await DatabaseHelper.instance.deleteRecord(
-                //           dbTable: "OrderItems",
-                //           where: 'orderItemId=?',
-                //           id: row['orderItemId']);
-                //       await _loadData();
-                //     },
-                //   ),
-                // ),
               ],
             );
           }).toList(),
         ),
         Padding(
-          padding: const EdgeInsets.all(18.0),
-          child: Row(
-            children: [
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Total'),
-                  Text('Service Charges'),
-                  Text('GST'),
-                  Text('Discount'),
-                  Text('Grand Total',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 30.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+          padding: const EdgeInsets.all(15.0),
+          child: SizedBox(
+            width: 250,
+            height: 130,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    const Text('Total'),
                     Text('Rs ${total.toString()}'),
-                    Text('Rs ${serviceCharges.toString()}'),
-                    Text('$gst% =  ${gstAmount.toStringAsFixed(1)}'),
-                    Text('$discount%  = ${discountAmount.toStringAsFixed(1)}'),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Service Charges'),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Text('Rs '),
+                        SizedBox(
+                          width: 30,
+                          height: 25,
+                          child: TextField(
+                            controller: serviceChargesCont,
+                            onChanged: (value) {
+                              serviceCharges = int.tryParse(value) ?? 0;
+                              calculateGrandTotal();
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('GST'),
+                    Text('$gst% = ${gstAmount.toStringAsFixed(1)}'),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Discount'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        SizedBox(
+                          width: 30,
+                          height: 25,
+                          child: TextField(
+                            controller: discountCont,
+                            onChanged: (value) {
+                              int disVal = int.tryParse(value) ?? 0;
+                              if (disVal <= 100) {
+                                discount = disVal;
+                              } else {
+                                discountCont.text = '';
+                                myCustomSnackBar(
+                                    context: context,
+                                    message:
+                                        'Discount can NOT be greater than 100',
+                                    warning: true);
+                              }
+                              calculateGrandTotal();
+                            },
+                          ),
+                        ),
+                        Text('% = ${discountAmount.toStringAsFixed(1)}'),
+                      ],
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Grand Total',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
                     Text('Rs ${grandTotal.toStringAsFixed(1)}',
                         style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold)),
                   ],
                 ),
-              )
-            ],
+              ],
+            ),
           ),
         ),
         FloatingActionButton.extended(
