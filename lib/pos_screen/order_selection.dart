@@ -52,12 +52,6 @@ class _OrderSelectionState extends State<OrderSelection> {
     // print('Order _loadData()');
   }
 
-  // Future<void> calculateGrandTotal() async {
-  //   grandTotal = widget.orderItems.fold<double>(0.0, (sum, item) {
-  //     return sum + (item['quantity'] * item['price']);
-  //   });
-  // }
-
   void calculateGrandTotal() {
     grandTotal = 0.0;
     total = 0.0;

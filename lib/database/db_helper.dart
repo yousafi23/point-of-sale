@@ -215,7 +215,7 @@ class DatabaseHelper {
     );
   }
 
-  Future<CompanyModel?> loadCompanyData(int id) async {
+  Future<CompanyModel> loadCompanyData(int id) async {
     final Database? db = await instance.database;
     // print('function');
     final List<Map<String, Object?>>? result = await db?.query(
@@ -224,14 +224,10 @@ class DatabaseHelper {
       whereArgs: [0],
     );
 
-    if (result!.isNotEmpty) {
-      // print('resss=${result}');
-      // print('resss=${result[0]}');
-      // print('Model=${CompanyModel.fromMap(result[0])}');
-      return CompanyModel.fromMap(result[0]);
-    } else {
-      return null;
-    }
+    // print('resss=${result}');
+    // print('resss=${result[0]}');
+    // print('Model=${CompanyModel.fromMap(result[0])}');
+    return CompanyModel.fromMap(result![0]);
   }
 
   Future<UserModel?> loginCheck(String username, String password) async {

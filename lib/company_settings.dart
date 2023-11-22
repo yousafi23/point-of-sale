@@ -23,13 +23,25 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
   final gstCont = TextEditingController();
   final discountCont = TextEditingController();
   File? logoImage;
+  Uint8List? imageBytes;
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
 
-  // @override
-  // Future<void> initState()  {
-  //   super.initState();
+  Future<void> _loadData() async {
+    final result =
+        await DatabaseHelper.instance.getRecord('Company', 'companyId=?', 0);
 
-  //   // companyNameController.text =
-  // }
+    companyNameController.text = result![0]['companyName'].toString();
+    gstCont.text = result[0]['gst'].toString();
+    serviceChargesCont.text = result[0]['serviceCharges'].toString();
+    discountCont.text = result[0]['discount'].toString();
+    imageBytes = result[0]['companyLogo'] as Uint8List;
+
+    setState(() {});
+  }
 
   Future<void> _getImage() async {
     final pickedFile =
@@ -43,9 +55,9 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
   }
 
   Future<void> _saveToDatabase() async {
-    if (logoImage == null) return;
+    // if (logoImage == null) return;
 
-    final Uint8List bytes = await logoImage!.readAsBytes();
+    final Uint8List bytes = (await logoImage?.readAsBytes()) ?? imageBytes!;
 
     final CompanyModel companyModel = CompanyModel(
       companyName: companyNameController.text.trim(),
@@ -54,7 +66,6 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
       gst: int.tryParse(gstCont.text.trim()) ?? 0,
       discount: int.tryParse(discountCont.text.trim()) ?? 0,
     );
-
     await DatabaseHelper.instance
         .updateRecord('Company', companyModel.toMap(), 'companyId=?', 0);
   }
@@ -123,7 +134,10 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
                           : null,
                     ),
                     child: logoImage == null
-                        ? Icon(Icons.image, size: 50, color: Colors.grey[600])
+                        ? Image.memory(
+                            imageBytes!,
+                            fit: BoxFit.contain,
+                          )
                         : null,
                   ),
                   const SizedBox(height: 20),
@@ -134,15 +148,6 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
                       backgroundColor: Color.fromARGB(255, 116, 2, 112),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  // SizedBox(
-                  //   width: 300,
-                  //   child: TextField(
-                  //     controller: companyNameController,
-                  //     decoration:
-                  //         const InputDecoration(labelText: 'Company Name'),
-                  //   ),
-                  // ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {
