@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/database/order_item_model.dart';
+import 'package:point_of_sale_app/database/product_model.dart';
 import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
 
 class PosTableWidget extends StatefulWidget {
@@ -35,6 +36,7 @@ class _PosTableWidgetState extends State<PosTableWidget> {
     setState(() {
       widget.productsData = result!;
       categories = getUniqueCategories();
+      // print(categories);
     });
   }
 
@@ -135,20 +137,23 @@ class PosTableCategory extends StatelessWidget {
         DataColumn(label: Text('Stock')),
         DataColumn(label: Text('Unit Price')),
         DataColumn(label: Text('')),
+        // DataColumn(label: Text('')),
       ],
-      rows: categoryProducts.map<DataRow>((Map<String, dynamic> row) {
+      rows: categoryProducts.map((Map<String, dynamic> row) {
+        ProductModel productModel =
+            ProductModel.fromMap(row); // Making a productModel object from row.
         return DataRow(
           cells: [
-            DataCell(Text(row['productId'].toString())),
+            DataCell(Text(productModel.productId.toString())),
             DataCell(SizedBox(
                 width: 100,
                 child: Text(
-                  row['prodName'],
+                  productModel.prodName,
                   maxLines: 2,
                 ))),
-            DataCell(Text(row['barCode'].toString())),
-            DataCell(Text(row['stock'].toString())),
-            DataCell(Text(row['unitPrice'].toString())),
+            DataCell(Text(productModel.barCode.toString())),
+            DataCell(Text(productModel.stock.toString())),
+            DataCell(Text(productModel.unitPrice.toString())),
             DataCell(
               GestureDetector(
                 child: const Icon(Icons.add),
@@ -189,5 +194,16 @@ class PosTableCategory extends StatelessWidget {
         );
       }).toList(),
     );
+  }
+}
+
+class SizeWidget extends StatelessWidget {
+  const SizeWidget({super.key, required this.sizes});
+
+  final String sizes;
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
   }
 }
