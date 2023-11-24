@@ -10,6 +10,7 @@ class ProductModel {
   final int? unitPrice;
   final String companyName;
   final String supplierName;
+  final int? productId;
 
   ProductModel({
     required this.prodName,
@@ -20,6 +21,7 @@ class ProductModel {
     this.unitPrice,
     required this.companyName,
     required this.supplierName,
+    this.productId,
   });
 
   ProductModel copyWith({
@@ -31,6 +33,7 @@ class ProductModel {
     int? unitPrice,
     String? companyName,
     String? supplierName,
+    int? productId,
   }) {
     return ProductModel(
       prodName: prodName ?? this.prodName,
@@ -41,6 +44,7 @@ class ProductModel {
       unitPrice: unitPrice ?? this.unitPrice,
       companyName: companyName ?? this.companyName,
       supplierName: supplierName ?? this.supplierName,
+      productId: productId ?? this.productId,
     );
   }
 
@@ -54,6 +58,7 @@ class ProductModel {
       'unitPrice': unitPrice,
       'companyName': companyName,
       'supplierName': supplierName,
+      'productId': productId,
     };
   }
 
@@ -77,7 +82,7 @@ class ProductModel {
 
   @override
   String toString() {
-    return 'ProductModel(prodName: $prodName, category: $category, barCode: $barCode, stock: $stock, unitCost: $unitCost, unitPrice: $unitPrice, companyName: $companyName, supplierName: $supplierName)';
+    return 'ProductModel(prodName: $prodName, category: $category, barCode: $barCode, stock: $stock, unitCost: $unitCost, unitPrice: $unitPrice, companyName: $companyName, supplierName: $supplierName, productId: $productId)';
   }
 
   @override
@@ -91,7 +96,8 @@ class ProductModel {
         other.unitCost == unitCost &&
         other.unitPrice == unitPrice &&
         other.companyName == companyName &&
-        other.supplierName == supplierName;
+        other.supplierName == supplierName &&
+        other.productId == productId;
   }
 
   @override
@@ -103,6 +109,7 @@ class ProductModel {
         unitCost.hashCode ^
         unitPrice.hashCode ^
         companyName.hashCode ^
-        supplierName.hashCode;
+        supplierName.hashCode ^
+        productId.hashCode;
   }
 }
