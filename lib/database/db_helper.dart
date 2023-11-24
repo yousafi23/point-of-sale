@@ -7,7 +7,7 @@ import 'package:point_of_sale_app/database/user_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
-  static const dbName = 'sqlite.db';
+  static const dbName = 'sqlitePUR.db';
   static const dbVersion = 1;
 
   static final DatabaseHelper instance = DatabaseHelper();
@@ -39,15 +39,6 @@ class DatabaseHelper {
       supplierName TEXT
     )''');
     await db.execute('''
-    CREATE TABLE Ingredients (
-      ingredientId INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT,
-      unitCost INT,
-      stock INT NOT NULL,
-      companyName TEXT,
-      supplierName TEXT
-    ) ''');
-    await db.execute('''
     CREATE TABLE  OrderItems (
       orderItemId INTEGER PRIMARY KEY AUTOINCREMENT,
       prodName TEXT NOT NULL,
@@ -66,6 +57,31 @@ class DatabaseHelper {
       serviceCharges INT,
       gstPercent INT,
       discountPercent INT
+    )''');
+    await db.execute('''
+    CREATE TABLE Ingredients (
+      ingredientId INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT,
+      unitCost INT,
+      stock INT NOT NULL,
+      companyName TEXT,
+      supplierName TEXT
+    ) ''');
+    await db.execute('''
+    CREATE TABLE PurchaseItems (
+      purchaseItemId INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      price INT NOT NULL,
+      quantity INT NOT NULL,
+      ingredientId INTEGER,
+      FOREIGN KEY (ingredientId) REFERENCES Ingeredients (ingredientId)
+    )''');
+    await db.execute('''
+    CREATE TABLE Purchases (
+      purchaseId INTEGER PRIMARY KEY AUTOINCREMENT,
+      purchaseDate DATETIME,
+      grandTotal DOUBLE,
+      purchaseItemsList TEXT
     )''');
     await db.execute('''
     CREATE TABLE Size (
@@ -182,6 +198,7 @@ class DatabaseHelper {
     }
   }
 
+// changeQuantity() AND changeIngredientQuantity() CAN BE MERGED INTO 1 FUNCTION
   Future<void> changeQuantity(int orderId, bool decrement) async {
     final int newQuantity;
     if (decrement == false) {
@@ -195,6 +212,24 @@ class DatabaseHelper {
       {'quantity': newQuantity},
       where: 'orderItemId = ?',
       whereArgs: [orderId],
+    );
+  }
+
+// changeQuantity() AND changeIngredientQuantity() CAN BE MERGED INTO 1 FUNCTION
+  Future<void> changeIngredientQuantity(
+      int purchaseItemId, bool decrement) async {
+    final int newQuantity;
+    if (decrement == false) {
+      newQuantity = (await getIngredientQuantity(purchaseItemId) + 1);
+    } else {
+      newQuantity = await getIngredientQuantity(purchaseItemId) - 1;
+    }
+    final Database? db = await instance.database;
+    await db?.update(
+      'PurchaseItems',
+      {'quantity': newQuantity},
+      where: 'purchaseItemId = ?',
+      whereArgs: [purchaseItemId],
     );
   }
 
@@ -253,6 +288,7 @@ class DatabaseHelper {
     }
   }
 
+// getQuantity() AND getIngredientQuantity() CAN BE MERGED INTO 1 FUNCTION
   Future<int> getQuantity(int orderItemId) async {
     final Database? db = await instance.database;
     final List<Map<String, Object?>>? result = await db?.query(
@@ -269,11 +305,41 @@ class DatabaseHelper {
     }
   }
 
+// getQuantity() AND getIngredientQuantity() CAN BE MERGED INTO 1 FUNCTION
+  Future<int> getIngredientQuantity(int purchaseItemId) async {
+    final Database? db = await instance.database;
+    final List<Map<String, Object?>>? result = await db?.query(
+      'PurchaseItems',
+      columns: ['quantity'],
+      where: 'purchaseItemId = ?',
+      whereArgs: [purchaseItemId],
+    );
+    if (result!.isNotEmpty) {
+      // print(" quantity: ${result[0]['quantity']}");
+      return (result[0]['quantity'] ?? 0) as int;
+    } else {
+      return 0;
+    }
+  }
+
   Future<int?> productCount(int productId) async {
     final Database? db = await instance.database;
     final result = await db?.rawQuery(
         'SELECT COUNT(*) as count FROM OrderItems WHERE productId = ?',
         [productId]);
+
+    if (result != null && result.isNotEmpty) {
+      final count = Sqflite.firstIntValue(result);
+      return count;
+    }
+    return -1;
+  }
+
+  Future<int?> ingredientCount(int ingredientId) async {
+    final Database? db = await instance.database;
+    final result = await db?.rawQuery(
+        'SELECT COUNT(*) as count FROM PurchaseItems WHERE ingredientId = ?',
+        [ingredientId]);
 
     if (result != null && result.isNotEmpty) {
       final count = Sqflite.firstIntValue(result);

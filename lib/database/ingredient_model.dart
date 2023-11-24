@@ -4,16 +4,18 @@ import 'dart:convert';
 class IngredientModel {
   final String name;
   final int stock;
-  final int? unitCost;
+  final int unitCost;
   final String companyName;
   final String supplierName;
+  final int? ingredientId;
 
   IngredientModel({
     required this.name,
     required this.stock,
-    this.unitCost,
+    required this.unitCost,
     required this.companyName,
     required this.supplierName,
+    this.ingredientId,
   });
 
   IngredientModel copyWith({
@@ -46,9 +48,11 @@ class IngredientModel {
     return IngredientModel(
       name: map['name'] as String,
       stock: map['stock'] as int,
-      unitCost: map['unitCost'] != null ? map['unitCost'] as int : null,
+      unitCost: map['unitCost'] as int,
       companyName: map['companyName'] as String,
       supplierName: map['supplierName'] as String,
+      ingredientId:
+          map['ingredientId'] != null ? map['ingredientId'] as int : null,
     );
   }
 

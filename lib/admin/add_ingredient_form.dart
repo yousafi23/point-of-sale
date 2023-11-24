@@ -83,7 +83,7 @@ class _AddIngredientState extends State<AddIngredient> {
                   IngredientModel ingredientModel = IngredientModel(
                       name: nameCont.text.trim(),
                       stock: int.tryParse(stockCont.text.trim()) ?? 0,
-                      unitCost: int.tryParse(unitCostCont.text.trim()),
+                      unitCost: int.tryParse(unitCostCont.text.trim()) ?? 0,
                       companyName: companyNameCont.text.trim(),
                       supplierName: supplierNameCont.text.trim());
 

@@ -7,6 +7,7 @@ import 'package:point_of_sale_app/database/company_model.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/login_screen.dart';
 import 'package:point_of_sale_app/order_view_screen.dart';
+import 'package:point_of_sale_app/pop-screen/pop-screen.dart';
 import 'package:point_of_sale_app/pos_screen/pos_screen.dart';
 
 class ReusableDrawer extends StatelessWidget {
@@ -62,6 +63,10 @@ class ReusableDrawer extends StatelessWidget {
           createDrawerItem(
             title: 'Ingredients',
             page: const IngredientsScreen(),
+          ),
+          createDrawerItem(
+            title: 'POP',
+            page: const PopScreen(),
           ),
           createDrawerItem(
             title: 'Users',
