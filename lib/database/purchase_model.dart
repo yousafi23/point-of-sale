@@ -30,7 +30,7 @@ class PurchaseModel {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'purchaseDate': purchaseDate.millisecondsSinceEpoch,
+      'purchaseDate': purchaseDate.toString(),
       'grandTotal': grandTotal,
       'purchaseItemsList': purchaseItemsList,
     };
