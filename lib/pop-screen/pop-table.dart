@@ -39,71 +39,68 @@ class _PopTableWidgetState extends State<PopTableWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 15.0),
-          child: DataTable(
-            columnSpacing: 15.0,
-            columns: const [
-              DataColumn(label: Text('ID')),
-              DataColumn(label: Text('Name')),
-              DataColumn(label: Text('stock')),
-              DataColumn(label: Text('Unit Cost')),
-              DataColumn(label: Text('companyName')),
-              DataColumn(label: Text('supplierName')),
-              DataColumn(label: Text('')),
-            ],
-            rows: productsData.map<DataRow>((Map<String, dynamic> row) {
-              IngredientModel ingredientModel = IngredientModel.fromMap(row);
+        DataTable(
+          columnSpacing: 15.0,
+          columns: const [
+            DataColumn(label: Text('ID')),
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('stock')),
+            DataColumn(label: Text('Unit Cost')),
+            DataColumn(label: Text('companyName')),
+            DataColumn(label: Text('supplierName')),
+            DataColumn(label: Text('')),
+          ],
+          rows: productsData.map<DataRow>((Map<String, dynamic> row) {
+            IngredientModel ingredientModel = IngredientModel.fromMap(row);
 
-              return DataRow(
-                cells: [
-                  DataCell(Text(ingredientModel.ingredientId.toString())),
-                  DataCell(SizedBox(
-                      width: 100,
-                      child: Text(
-                        ingredientModel.name,
-                        maxLines: 2,
-                      ))),
-                  DataCell(Text(ingredientModel.stock.toString())),
-                  DataCell(Text(ingredientModel.unitCost.toString())),
-                  DataCell(Text(ingredientModel.companyName)),
-                  DataCell(Text(ingredientModel.supplierName)),
-                  DataCell(
-                    GestureDetector(
-                      child: const Icon(Icons.add),
-                      onTap: () async {
-                        PurchaseItemModel purchaseItemModel = PurchaseItemModel(
-                            name: ingredientModel.name,
-                            price: ingredientModel.unitCost,
-                            quantity: 1,
-                            ingredientId: ingredientModel.ingredientId!);
+            return DataRow(
+              cells: [
+                DataCell(Text(ingredientModel.ingredientId.toString())),
+                DataCell(SizedBox(
+                    width: 100,
+                    child: Text(
+                      ingredientModel.name,
+                      maxLines: 2,
+                    ))),
+                DataCell(Text(ingredientModel.stock.toString())),
+                DataCell(Text(ingredientModel.unitCost.toString())),
+                DataCell(Text(ingredientModel.companyName)),
+                DataCell(Text(ingredientModel.supplierName)),
+                DataCell(
+                  GestureDetector(
+                    child: const Icon(Icons.add),
+                    onTap: () async {
+                      PurchaseItemModel purchaseItemModel = PurchaseItemModel(
+                          name: ingredientModel.name,
+                          price: ingredientModel.unitCost,
+                          quantity: 1,
+                          ingredientId: ingredientModel.ingredientId!);
 
-                        int? ingredientCount = await DatabaseHelper.instance
-                            .ingredientCount(ingredientModel.ingredientId!);
+                      int? ingredientCount = await DatabaseHelper.instance
+                          .ingredientCount(ingredientModel.ingredientId!);
 
-                        if (ingredientCount! < 1) {
-                          await DatabaseHelper.instance.insertRecord(
-                              'PurchaseItems', purchaseItemModel.toMap());
+                      if (ingredientCount! < 1) {
+                        await DatabaseHelper.instance.insertRecord(
+                            'PurchaseItems', purchaseItemModel.toMap());
 
-                          widget.reloadCallback();
+                        widget.reloadCallback();
 
-                          myCustomSnackBar(
-                              message: '${ingredientModel.name} Added',
-                              warning: false,
-                              context: context);
-                        } else {
-                          myCustomSnackBar(
-                              message: 'Ingredient Already in Purchase List!',
-                              warning: true,
-                              context: context);
-                        }
-                      },
-                    ),
+                        myCustomSnackBar(
+                            message: '${ingredientModel.name} Added',
+                            warning: false,
+                            context: context);
+                      } else {
+                        myCustomSnackBar(
+                            message: 'Ingredient Already in Purchase List!',
+                            warning: true,
+                            context: context);
+                      }
+                    },
                   ),
-                ],
-              );
-            }).toList(),
-          ),
+                ),
+              ],
+            );
+          }).toList(),
         ),
       ],
     );
