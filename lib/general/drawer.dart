@@ -9,6 +9,7 @@ import 'package:point_of_sale_app/login_screen.dart';
 import 'package:point_of_sale_app/order_view_screen.dart';
 import 'package:point_of_sale_app/pop-screen/pop-screen.dart';
 import 'package:point_of_sale_app/pos_screen/pos_screen.dart';
+import 'package:point_of_sale_app/purchase_history.dart';
 
 class ReusableDrawer extends StatelessWidget {
   final String title;
@@ -69,12 +70,16 @@ class ReusableDrawer extends StatelessWidget {
             page: const PopScreen(),
           ),
           createDrawerItem(
+            title: 'Purchase History',
+            page: const PurchaseHistory(),
+          ),
+          createDrawerItem(
             title: 'Users',
             page: const UsersScreen(),
           ),
           createDrawerItem(
             title: 'Orders',
-            page: OrderViewScreen(),
+            page: const OrderViewScreen(),
           ),
           createDrawerItem(
             title: 'Company Settings',

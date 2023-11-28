@@ -7,7 +7,7 @@ import 'package:point_of_sale_app/database/user_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
-  static const dbName = 'sqlitePUR.db';
+  static const dbName = 'sqlite.db';
   static const dbVersion = 1;
 
   static final DatabaseHelper instance = DatabaseHelper();
