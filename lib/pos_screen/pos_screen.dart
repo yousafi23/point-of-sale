@@ -27,60 +27,57 @@ class _PosScreenState extends State<PosScreen> {
         "POS",
         const Color.fromARGB(255, 2, 122, 4),
       ),
-      body: Container(
-        alignment: Alignment.center,
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SingleChildScrollView(
-                child: PosTableWidget(
-                  productsData: productsData,
-                  reloadCallback: () async {
-                    final database = await DatabaseHelper.instance.database;
-                    final result = await database?.query('OrderItems');
-                    final result2 = await database?.query('Products');
+      body: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SingleChildScrollView(
+              child: PosTableWidget(
+                productsData: productsData,
+                reloadCallback: () async {
+                  final database = await DatabaseHelper.instance.database;
+                  final result = await database?.query('OrderItems');
+                  final result2 = await database?.query('Products');
 
-                    // print('ress=$result');
-                    setState(() {
-                      productsData = result2!;
-                      orderProducts = result!;
-                    });
-                    // print('reloadCallback()');
-                  },
-                ),
+                  // print('ress=$result');
+                  setState(() {
+                    productsData = result2!;
+                    orderProducts = result!;
+                  });
+                  // print('reloadCallback()');
+                },
               ),
-              SingleChildScrollView(
-                child: Column(
-                  children: [
-                    OrderSelection(
-                      orderItems: orderProducts,
-                      quantityCallback: (int prodID, bool isIncrement) async {
-                        await DatabaseHelper.instance
-                            .updateStock(prodID, isIncrement);
-                        // print('$isIncrement, ID=$prodID');
+            ),
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  OrderSelection(
+                    orderItems: orderProducts,
+                    quantityCallback: (int prodID, bool isIncrement) async {
+                      await DatabaseHelper.instance
+                          .updateStock(prodID, isIncrement);
+                      // print('$isIncrement, ID=$prodID');
 
-                        final database = await DatabaseHelper.instance.database;
-                        final result = await database?.query('Products');
-                        final result2 = await database?.query('OrderItems');
+                      final database = await DatabaseHelper.instance.database;
+                      final result = await database?.query('Products');
+                      final result2 = await database?.query('OrderItems');
 
-                        // print('ress=$result');
-                        setState(() {
-                          orderProducts = result2!;
-                          productsData = result!;
-                          // print('set state from quantityCallBack()');
-                        });
-                        // print('quantityCallBack()');
-                      },
-                    )
-                  ],
-                ),
-              )
-            ],
-          ),
+                      // print('ress=$result');
+                      setState(() {
+                        orderProducts = result2!;
+                        productsData = result!;
+                        // print('set state from quantityCallBack()');
+                      });
+                      // print('quantityCallBack()');
+                    },
+                  )
+                ],
+              ),
+            )
+          ],
         ),
       ),
     );

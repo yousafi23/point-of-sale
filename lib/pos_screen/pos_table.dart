@@ -49,23 +49,21 @@ class _PosTableWidgetState extends State<PosTableWidget> {
   Widget build(BuildContext context) {
     return SizedBox(
       width: MediaQuery.of(context).size.width * .4,
-      child: SingleChildScrollView(
-        child: Column(
-          children: List.generate(
-            categories.length,
-            (index) {
-              final category = categories[index];
-              final categoryProducts = widget.productsData
-                  .where((product) => product['category'] == category)
-                  .toList();
+      child: Column(
+        children: List.generate(
+          categories.length,
+          (index) {
+            final category = categories[index];
+            final categoryProducts = widget.productsData
+                .where((product) => product['category'] == category)
+                .toList();
 
-              return CategoryWidget(
-                categoryName: category,
-                products: categoryProducts,
-                reloadCallback: widget.reloadCallback,
-              );
-            },
-          ),
+            return CategoryWidget(
+              categoryName: category,
+              products: categoryProducts,
+              reloadCallback: widget.reloadCallback,
+            );
+          },
         ),
       ),
     );
@@ -86,25 +84,24 @@ class CategoryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          color: Colors.green.shade200,
-          child: Align(
-            alignment: Alignment.center,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                categoryName,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+    return ExpansionTile(
+      title: Container(
+        color: Colors.green.shade100,
+        child: Align(
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              categoryName,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
         ),
+      ),
+      children: [
         PosTableCategory(
           categoryProducts: products,
           reloadCallback: reloadCallback,
