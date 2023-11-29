@@ -85,4 +85,32 @@ class ProductModel {
   String toString() {
     return 'ProductModel(prodName: $prodName, category: $category, barCode: $barCode, stock: $stock, unitCost: $unitCost, unitPrice: $unitPrice, companyName: $companyName, supplierName: $supplierName, productId: $productId)';
   }
+
+  @override
+  bool operator ==(covariant ProductModel other) {
+    if (identical(this, other)) return true;
+
+    return other.prodName == prodName &&
+        other.category == category &&
+        other.barCode == barCode &&
+        other.stock == stock &&
+        other.unitCost == unitCost &&
+        other.unitPrice == unitPrice &&
+        other.companyName == companyName &&
+        other.supplierName == supplierName &&
+        other.productId == productId;
+  }
+
+  @override
+  int get hashCode {
+    return prodName.hashCode ^
+        category.hashCode ^
+        barCode.hashCode ^
+        stock.hashCode ^
+        unitCost.hashCode ^
+        unitPrice.hashCode ^
+        companyName.hashCode ^
+        supplierName.hashCode ^
+        productId.hashCode;
+  }
 }
