@@ -3,6 +3,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:point_of_sale_app/database/company_model.dart';
 import 'package:point_of_sale_app/database/order_model.dart';
+import 'package:point_of_sale_app/database/size_model.dart';
 import 'package:point_of_sale_app/database/user_model.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -322,17 +323,36 @@ class DatabaseHelper {
     }
   }
 
-  Future<int?> productCount(int productId) async {
+  Future<int?> productCount(String prodName) async {
     final Database? db = await instance.database;
     final result = await db?.rawQuery(
-        'SELECT COUNT(*) as count FROM OrderItems WHERE productId = ?',
-        [productId]);
+        'SELECT COUNT(*) as count FROM OrderItems WHERE prodName = ?',
+        [prodName]);
 
     if (result != null && result.isNotEmpty) {
       final count = Sqflite.firstIntValue(result);
       return count;
     }
     return -1;
+  }
+
+  Future<List<SizeModel>> getProductSizes(int productId) async {
+    List<SizeModel> sizes = [];
+
+    final Database? db = await instance.database;
+    final List<Map<String, Object?>>? result = await db?.query(
+      'Size',
+      where: 'productId = ?',
+      whereArgs: [productId],
+    );
+
+    if (result != null) {
+      for (var size in result) {
+        sizes.add(SizeModel.fromMap(size));
+      }
+    }
+    // print('SSS=$sizes');
+    return sizes;
   }
 
   Future<int?> ingredientCount(int ingredientId) async {
