@@ -5,7 +5,6 @@ import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/database/order_item_model.dart';
 import 'package:point_of_sale_app/database/product_model.dart';
 import 'package:point_of_sale_app/database/size_model.dart';
-import 'package:point_of_sale_app/database/product_model.dart';
 import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
 
 class PosTableWidget extends StatefulWidget {
@@ -138,7 +137,6 @@ class PosTableCategory extends StatelessWidget {
         DataColumn(label: Text('Stock')),
         DataColumn(label: Text('Price')),
         DataColumn(label: Text('')),
-        // DataColumn(label: Text('')),
       ],
       rows: categoryProducts.map<DataRow>((Map<String, dynamic> row) {
         ProductModel productModel = ProductModel.fromMap(row);
