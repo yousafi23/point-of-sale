@@ -263,5 +263,3 @@ Future<void Function()?> productSelected(BuildContext context,
   }
   return null;
 }
-
-

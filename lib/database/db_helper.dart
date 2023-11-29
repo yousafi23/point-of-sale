@@ -344,6 +344,7 @@ class DatabaseHelper {
       'Size',
       where: 'productId = ?',
       whereArgs: [productId],
+      orderBy: 'unitCost ASC',
     );
 
     if (result != null) {
