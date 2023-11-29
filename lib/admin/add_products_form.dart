@@ -164,6 +164,29 @@ class _AddProductState extends State<AddProduct> {
                                 ),
                                 controller: pricesController[index],
                               ),
+                              GestureDetector(
+                                child: const Icon(
+                                  Icons.minimize,
+                                  color: Colors.redAccent,
+                                ),
+                                onTap: () {
+                                  setState(() {
+                                    sizesController.removeAt(index);
+                                    pricesController.removeAt(index);
+
+                                    if (widget.isUpdate == true) {
+                                      if (index < widget.sizeIds!.length) {
+                                        // If it's an update and if the sizeId is in sizeIds List (NOT new) then Delete.
+                                        DatabaseHelper.instance.deleteRecord(
+                                          dbTable: 'Size',
+                                          where: 'sizeId = ?',
+                                          id: widget.sizeIds![index] as int,
+                                        );
+                                      }
+                                    }
+                                  });
+                                },
+                              ),
                             ],
                           );
                         },
@@ -179,6 +202,10 @@ class _AddProductState extends State<AddProduct> {
                             setState(() {
                               sizesController.add(TextEditingController());
                               pricesController.add(TextEditingController());
+                              if (widget.isUpdate == true) {
+                                // sizesController.length++;
+                                // pricesController.length++;
+                              }
                             });
                           },
                         ),
@@ -199,19 +226,22 @@ class _AddProductState extends State<AddProduct> {
                     unitPrice: int.tryParse(unitpriceCont.text.trim()),
                     stock: int.tryParse(stockCont.text.trim()) ?? 0,
                     companyName: companyCont.text.trim(),
-                    supplierName: supplierCont.text.trim());
+                    supplierName: supplierCont.text.trim(),
+                    productId: widget.prodId);
 
                 if (widget.isUpdate == true) {
-                  // print('Size Cont = ${sizesController}');
-                  // print('Price Cont = $pricesController');
+                  // print('Size Cont = ${sizesController.length}');
+                  // print('Price Cont = ${pricesController.length}');
+                  // print('${productModel.toMap()}');
 
                   await DatabaseHelper.instance.updateRecord('Products',
                       productModel.toMap(), "productId=?", widget.prodId!);
 
                   for (int i = 0; i < sizesController.length; i++) {
-                    // print('....i=$i');
-                    // print('${sizesController[i].text.trim()}');
-                    // print('${pricesController[i].text.trim()}');
+                    int? sizeId =
+                        (widget.sizeIds != null && widget.sizeIds!.length > i)
+                            ? widget.sizeIds![i] as int?
+                            : null;
 
                     SizeModel sizeModel = SizeModel(
                       productId: widget.prodId!,
@@ -220,13 +250,15 @@ class _AddProductState extends State<AddProduct> {
                           int.tryParse(pricesController[i].text.trim()) ?? 0,
                     );
 
-                    await DatabaseHelper.instance.updateRecord(
-                        'Size',
-                        sizeModel.toMap(),
-                        "sizeId=?",
-                        widget.sizeIds![i] as int);
-                    // print('Final= ${sizeModel.toString()}');
+                    if (sizeId != null) {
+                      await DatabaseHelper.instance.updateRecord(
+                          'Size', sizeModel.toMap(), "sizeId=?", sizeId);
+                    } else {
+                      await DatabaseHelper.instance
+                          .insertRecord('Size', sizeModel.toMap());
+                    }
                   }
+
                   myCustomSnackBar(
                       message: 'Product Updated: ${productModel.prodName}',
                       warning: false,
@@ -259,14 +291,6 @@ class _AddProductState extends State<AddProduct> {
               label: const Text("Submit"),
             ),
             const SizedBox(height: 45),
-            // TextButton(
-            //     onPressed: () async {
-            //       var dbquery =
-            //           await DatabaseHelper.instance.queryDatabase('Products');
-            //       print(dbquery);
-            //     },
-            //     child: const Text("Print DB"),
-            // ),
           ],
         ),
       ),
