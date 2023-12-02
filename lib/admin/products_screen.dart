@@ -32,14 +32,18 @@ class _ProductsScreenState extends State<ProductsScreen> {
             SizedBox(
                 height: MediaQuery.of(context).size.height - 200,
                 child: const SingleChildScrollView(child: ProductsDataTable())),
-            FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => AddProduct()),
-                );
-              },
-              label: const Text("Add"),
-              icon: const Icon(Icons.add),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: FloatingActionButton.extended(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => AddProduct()),
+                  );
+                },
+                backgroundColor: Colors.purple.shade600,
+                label: const Text("Add"),
+                icon: const Icon(Icons.add),
+              ),
             ),
           ],
         ),

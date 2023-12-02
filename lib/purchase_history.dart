@@ -82,6 +82,9 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                 ),
                 color: Colors.green.shade100,
                 child: ExpansionTile(
+                  textColor: Colors.green.shade800,
+                  iconColor: Colors.green.shade800,
+                  shape: const Border(),
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -99,7 +102,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                   children: [
                     for (var item in purchaseItemsList)
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(15, 5, 45, 10),
+                        padding: const EdgeInsets.fromLTRB(15, 0, 25, 10),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [

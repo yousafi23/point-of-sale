@@ -312,6 +312,7 @@ class _OrderSelectionState extends State<OrderSelection> {
                 );
               }
             },
+            backgroundColor: Colors.green.shade700,
             label: const Text('Place Order'),
           )
         ],

@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
@@ -61,7 +63,7 @@ class _OrderViewScreenState extends State<OrderViewScreen> {
         padding: const EdgeInsets.all(15.0),
         child: GridView.builder(
           gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 350.0, // maximum width
+            maxCrossAxisExtent: 370.0, // maximum width
             mainAxisSpacing: 10.0,
             crossAxisSpacing: 10.0,
           ),
@@ -101,18 +103,33 @@ class _OrderViewScreenState extends State<OrderViewScreen> {
                       const SizedBox(height: 10),
                       Column(
                         children: orderItemsList.map((item) {
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('${item['prodName']}'),
-                              Text(
-                                '${item['price']} x ${item['quantity']} = ${item['price'] * item['quantity']}',
-                              ),
-                            ],
+                          return Tooltip(
+                            decoration: BoxDecoration(
+                                color: Colors.green[700],
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(5))),
+                            message:
+                                '${item['prodName']}\n${item['price']} x ${item['quantity']} = ${item['price'] * item['quantity']}',
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                  width: 140,
+                                  child: Text(
+                                    '${item['prodName']}',
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Text(
+                                  '${item['price']} x ${item['quantity']} = ${item['price'] * item['quantity']}',
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
                           );
                         }).toList(),
                       ),
-                      const Divider(color: Colors.black54),
+                      const Divider(color: Color.fromARGB(255, 1, 77, 4)),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [

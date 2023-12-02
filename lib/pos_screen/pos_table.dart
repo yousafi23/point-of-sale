@@ -88,6 +88,9 @@ class CategoryWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpansionTile(
+      expandedAlignment: Alignment.topLeft,
+      textColor: Colors.green.shade800,
+      iconColor: Colors.green.shade800,
       shape: const Border(),
       initiallyExpanded: true,
       title: Container(
@@ -148,6 +151,7 @@ class PosTableCategory extends StatelessWidget {
                 child: Text(
                   productModel.prodName,
                   maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ))),
             DataCell(Text(productModel.barCode.toString())),
             DataCell(Text(productModel.stock.toString())),
@@ -196,8 +200,7 @@ class SizeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      runSpacing: 5,
+    return Row(
       children: sizes.map((size) {
         return Padding(
           padding: const EdgeInsets.fromLTRB(3, 0, 3, 0),

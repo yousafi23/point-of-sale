@@ -1,8 +1,8 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
 
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:point_of_sale_app/admin/products_screen.dart';
 import 'package:point_of_sale_app/database/company_model.dart';
@@ -11,7 +11,7 @@ import 'package:point_of_sale_app/general/my_custom_appbar.dart';
 import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
 
 class CompanySettingsScreen extends StatefulWidget {
-  CompanySettingsScreen({super.key});
+  const CompanySettingsScreen({super.key});
 
   @override
   _CompanySettingsScreenState createState() => _CompanySettingsScreenState();
@@ -79,13 +79,15 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(15.0),
-        child: Row(
+        child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                children: [
-                  SizedBox(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: SizedBox(
                     width: 300,
                     height: 300,
                     child: Column(
@@ -98,75 +100,84 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
                         ),
                         TextField(
                             controller: serviceChargesCont,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
                             decoration: const InputDecoration(
                                 labelText: 'Service Charges')),
                         TextField(
                             controller: gstCont,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
                             decoration:
                                 const InputDecoration(labelText: 'GST %')),
                         TextField(
                             controller: discountCont,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
                             decoration:
                                 const InputDecoration(labelText: 'Discount %')),
                       ],
                     ),
-                  )
-                ],
-              ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        height: 300,
+                        width: 300,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Colors.purple.shade100, // Placeholder color
+                          image: logoImage != null
+                              ? DecorationImage(
+                                  image: FileImage(logoImage!),
+                                  fit: BoxFit
+                                      .contain, // This will maintain the aspect ratio
+                                )
+                              : null,
+                        ),
+                        child: logoImage == null
+                            ? Image.memory(
+                                imageBytes!,
+                                fit: BoxFit.contain,
+                              )
+                            : null,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: ElevatedButton(
+                          onPressed: _getImage,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromARGB(255, 116, 2, 112),
+                          ),
+                          child: const Text('Select Logo'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    height: 300,
-                    width: 300,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: Colors.grey[200], // Placeholder color
-                      image: logoImage != null
-                          ? DecorationImage(
-                              image: FileImage(logoImage!),
-                              fit: BoxFit
-                                  .contain, // This will maintain the aspect ratio
-                            )
-                          : null,
-                    ),
-                    child: logoImage == null
-                        ? Image.memory(
-                            imageBytes!,
-                            fit: BoxFit.contain,
-                          )
-                        : null,
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _getImage,
-                    child: const Text('Select Logo'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 116, 2, 112),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await _saveToDatabase();
+            FloatingActionButton.extended(
+              onPressed: () async {
+                await _saveToDatabase();
 
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => const ProductsScreen()));
-                      myCustomSnackBar(
-                          message: 'Company settings Saved',
-                          warning: false,
-                          context: context);
-                    },
-                    child: const Text('Save'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 116, 2, 112),
-                    ),
-                  ),
-                ],
-              ),
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const ProductsScreen()));
+                myCustomSnackBar(
+                    message: 'Company settings Saved',
+                    warning: false,
+                    context: context);
+              },
+              backgroundColor: const Color.fromARGB(255, 116, 2, 112),
+              label: const Text('Save Settings'),
             ),
           ],
         ),

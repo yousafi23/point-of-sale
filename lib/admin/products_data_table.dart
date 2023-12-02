@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/admin/add_products_form.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
@@ -15,6 +17,7 @@ class ProductsDataTable extends StatefulWidget {
 class _ProductsDataTableState extends State<ProductsDataTable> {
   List<Map<String, dynamic>> productsTableData = [];
   List<Map<String, dynamic>> sizeTableData = [];
+  int counter = 1;
 
   @override
   void initState() {
@@ -36,6 +39,8 @@ class _ProductsDataTableState extends State<ProductsDataTable> {
     return Column(
       children: [
         DataTable(
+          headingRowColor: MaterialStateColor.resolveWith(
+              (states) => Colors.purple.shade400),
           columnSpacing: 30.0,
           columns: const [
             DataColumn(label: Text('ID')),
@@ -51,30 +56,36 @@ class _ProductsDataTableState extends State<ProductsDataTable> {
             DataColumn(label: Text('')),
           ],
           rows: productsTableData.map<DataRow>((Map<String, dynamic> row) {
+            ProductModel productModel = ProductModel.fromMap(row);
+            counter++;
             return DataRow(
+              color: counter.isEven
+                  ? MaterialStateProperty.resolveWith((states) => Colors.white)
+                  : MaterialStateProperty.resolveWith(
+                      (states) => Colors.purple[100]),
               cells: [
-                DataCell(Text(row['productId'].toString())),
+                DataCell(Text(productModel.productId.toString())),
                 DataCell(SizedBox(
                     width: 100,
                     child: Text(
-                      row['prodName'],
+                      productModel.prodName,
                       maxLines: 2,
                     ))),
-                DataCell(Text(row['barCode'].toString())),
-                DataCell(Text(row['category'].toString())),
-                DataCell(Text(row['unitCost'].toString())),
-                DataCell(Text(row['unitPrice'].toString())),
-                DataCell(Text(row['stock'].toString())),
+                DataCell(Text(productModel.barCode)),
+                DataCell(Text(productModel.category)),
+                DataCell(Text(productModel.unitCost.toString())),
+                DataCell(Text(productModel.unitPrice.toString())),
+                DataCell(Text(productModel.stock.toString())),
                 DataCell(SizedBox(
                     width: 100,
                     child: Text(
-                      row['companyName'],
+                      productModel.companyName,
                       maxLines: 2,
                     ))),
                 DataCell(SizedBox(
                     width: 100,
                     child: Text(
-                      row['supplierName'],
+                      productModel.supplierName,
                       maxLines: 2,
                     ))),
                 DataCell(
@@ -83,26 +94,22 @@ class _ProductsDataTableState extends State<ProductsDataTable> {
                     onTap: () async {
                       var sizes = await DatabaseHelper.instance
                           .getRecord('Size', 'productId=?', row['productId']);
-                      // print('$sizes');
                       List<SizeModel> sizeModels =
                           sizes!.map((map) => SizeModel.fromMap(map)).toList();
 
                       List<Object?> sizeIds =
                           sizes.map((size) => size['sizeId']).toList();
-                      // print('$sizeIds');
-
-                      // print('Size MODEL=${sizeModels}');
-                      // print('MODELLLL=${ProductModel.fromMap(row)}');
 
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                            builder: (context) => AddProduct(
-                                  isUpdate: true,
-                                  sizeModels: sizeModels,
-                                  sizeIds: sizeIds,
-                                  productModel: ProductModel.fromMap(row),
-                                  prodId: row['productId'],
-                                )),
+                          builder: (context) => AddProduct(
+                            isUpdate: true,
+                            sizeModels: sizeModels,
+                            sizeIds: sizeIds,
+                            productModel: ProductModel.fromMap(row),
+                            prodId: row['productId'],
+                          ),
+                        ),
                       );
                     },
                   ),

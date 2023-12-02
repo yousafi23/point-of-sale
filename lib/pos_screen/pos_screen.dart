@@ -28,7 +28,7 @@ class _PosScreenState extends State<PosScreen> {
         const Color.fromARGB(255, 2, 122, 4),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 50),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.max,

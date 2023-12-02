@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:point_of_sale_app/admin/products_screen.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/database/size_model.dart';
@@ -40,6 +41,8 @@ class _AddProductState extends State<AddProduct> {
   List<TextEditingController> sizesController = [];
   List<TextEditingController> pricesController = [];
 
+  bool isEmpty = false;
+
   @override
   void initState() {
     super.initState();
@@ -63,6 +66,13 @@ class _AddProductState extends State<AddProduct> {
       supplierCont.text = widget.productModel!.supplierName;
     }
   }
+
+  // String? isEmpty(value) {
+  //   if (!(value.length > 5) && value.isNotEmpty) {
+  //     return "Password should contain more than 5 characters";
+  //   }
+  //   return null;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -151,6 +161,11 @@ class _AddProductState extends State<AddProduct> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               TextFormField(
+                                onTapOutside: (value) {
+                                  (sizesController[index].text.isEmpty)
+                                      ? isEmpty = true
+                                      : isEmpty = false;
+                                },
                                 decoration: const InputDecoration(
                                   labelText: 'Size',
                                   constraints: BoxConstraints(maxWidth: 120),
@@ -158,6 +173,14 @@ class _AddProductState extends State<AddProduct> {
                                 controller: sizesController[index],
                               ),
                               TextFormField(
+                                onTapOutside: (value) {
+                                  (pricesController[index].text.isEmpty)
+                                      ? isEmpty = true
+                                      : isEmpty = false;
+                                },
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
                                 decoration: const InputDecoration(
                                   labelText: 'Cost',
                                   constraints: BoxConstraints(maxWidth: 120),
@@ -196,16 +219,12 @@ class _AddProductState extends State<AddProduct> {
                         child: GestureDetector(
                           child: const Icon(
                             Icons.add,
-                            color: Colors.blue,
+                            color: Color.fromARGB(255, 116, 2, 122),
                           ),
                           onTap: () {
                             setState(() {
                               sizesController.add(TextEditingController());
                               pricesController.add(TextEditingController());
-                              if (widget.isUpdate == true) {
-                                // sizesController.length++;
-                                // pricesController.length++;
-                              }
                             });
                           },
                         ),
@@ -218,75 +237,14 @@ class _AddProductState extends State<AddProduct> {
             const SizedBox(height: 45),
             FloatingActionButton.extended(
               onPressed: () async {
-                ProductModel productModel = ProductModel(
-                    prodName: nameCont.text.trim(),
-                    category: categoryCont.text.trim(),
-                    barCode: barcodeCont.text.trim(),
-                    unitCost: int.tryParse(unitcostCont.text.trim()),
-                    unitPrice: int.tryParse(unitpriceCont.text.trim()),
-                    stock: int.tryParse(stockCont.text.trim()) ?? 0,
-                    companyName: companyCont.text.trim(),
-                    supplierName: supplierCont.text.trim(),
-                    productId: widget.prodId);
-
-                if (widget.isUpdate == true) {
-                  // print('Size Cont = ${sizesController.length}');
-                  // print('Price Cont = ${pricesController.length}');
-                  // print('${productModel.toMap()}');
-
-                  await DatabaseHelper.instance.updateRecord('Products',
-                      productModel.toMap(), "productId=?", widget.prodId!);
-
-                  for (int i = 0; i < sizesController.length; i++) {
-                    int? sizeId =
-                        (widget.sizeIds != null && widget.sizeIds!.length > i)
-                            ? widget.sizeIds![i] as int?
-                            : null;
-
-                    SizeModel sizeModel = SizeModel(
-                      productId: widget.prodId!,
-                      size: sizesController[i].text.trim(),
-                      unitCost:
-                          int.tryParse(pricesController[i].text.trim()) ?? 0,
-                    );
-
-                    if (sizeId != null) {
-                      await DatabaseHelper.instance.updateRecord(
-                          'Size', sizeModel.toMap(), "sizeId=?", sizeId);
-                    } else {
-                      await DatabaseHelper.instance
-                          .insertRecord('Size', sizeModel.toMap());
-                    }
-                  }
-
-                  myCustomSnackBar(
-                      message: 'Product Updated: ${productModel.prodName}',
-                      warning: false,
-                      context: context);
+                if (isEmpty != true) {
+                  addProduct();
                 } else {
-                  var prodId = await DatabaseHelper.instance
-                      .insertRecord('Products', productModel.toMap());
-
-                  for (int i = 0; i < sizesController.length; i++) {
-                    SizeModel sizeModel = SizeModel(
-                      productId: prodId,
-                      size: sizesController[i].text.trim(),
-                      unitCost:
-                          int.tryParse(pricesController[i].text.trim()) ?? 0,
-                    );
-
-                    await DatabaseHelper.instance
-                        .insertRecord('Size', sizeModel.toMap());
-                  }
-
                   myCustomSnackBar(
-                      message: 'Product Added: ${productModel.prodName}',
-                      warning: false,
+                      message: 'Fields are empty',
+                      warning: true,
                       context: context);
                 }
-
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const ProductsScreen()));
               },
               label: const Text("Submit"),
             ),
@@ -295,5 +253,72 @@ class _AddProductState extends State<AddProduct> {
         ),
       ),
     );
+  }
+
+  Future<void> addProduct() async {
+    ProductModel productModel = ProductModel(
+        prodName: nameCont.text.trim(),
+        category: categoryCont.text.trim(),
+        barCode: barcodeCont.text.trim(),
+        unitCost: int.tryParse(unitcostCont.text.trim()),
+        unitPrice: int.tryParse(unitpriceCont.text.trim()),
+        stock: int.tryParse(stockCont.text.trim()) ?? 0,
+        companyName: companyCont.text.trim(),
+        supplierName: supplierCont.text.trim(),
+        productId: widget.prodId);
+
+    if (widget.isUpdate == true) {
+      // print('Size Cont = ${sizesController.length}');
+      // print('Price Cont = ${pricesController.length}');
+      // print('${productModel.toMap()}');
+
+      await DatabaseHelper.instance.updateRecord(
+          'Products', productModel.toMap(), "productId=?", widget.prodId!);
+
+      for (int i = 0; i < sizesController.length; i++) {
+        int? sizeId = (widget.sizeIds != null && widget.sizeIds!.length > i)
+            ? widget.sizeIds![i] as int?
+            : null;
+
+        SizeModel sizeModel = SizeModel(
+          productId: widget.prodId!,
+          size: sizesController[i].text.trim(),
+          unitCost: int.tryParse(pricesController[i].text.trim()) ?? 0,
+        );
+
+        if (sizeId != null) {
+          await DatabaseHelper.instance
+              .updateRecord('Size', sizeModel.toMap(), "sizeId=?", sizeId);
+        } else {
+          await DatabaseHelper.instance.insertRecord('Size', sizeModel.toMap());
+        }
+      }
+
+      myCustomSnackBar(
+          message: 'Product Updated: ${productModel.prodName}',
+          warning: false,
+          context: context);
+    } else {
+      var prodId = await DatabaseHelper.instance
+          .insertRecord('Products', productModel.toMap());
+
+      for (int i = 0; i < sizesController.length; i++) {
+        SizeModel sizeModel = SizeModel(
+          productId: prodId,
+          size: sizesController[i].text.trim(),
+          unitCost: int.tryParse(pricesController[i].text.trim()) ?? 0,
+        );
+
+        await DatabaseHelper.instance.insertRecord('Size', sizeModel.toMap());
+      }
+
+      myCustomSnackBar(
+          message: 'Product Added: ${productModel.prodName}',
+          warning: false,
+          context: context);
+    }
+
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => const ProductsScreen()));
   }
 }
