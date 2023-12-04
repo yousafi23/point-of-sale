@@ -42,10 +42,13 @@ class _PosTableWidgetState extends State<PosTableWidget> {
   }
 
   List<String> getUniqueCategories() {
-    return widget.productsData
+    List<String> uniqueCategories = widget.productsData
         .map<String>((product) => product['category'] as String)
         .toSet()
         .toList();
+
+    // uniqueCategories.sort();
+    return uniqueCategories;
   }
 
   @override
