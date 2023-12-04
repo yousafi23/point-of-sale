@@ -1,8 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/admin/ingredients_screen.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/database/ingredient_model.dart';
 import 'package:point_of_sale_app/general/my_custom_appbar.dart';
+import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
 
 // ignore: must_be_immutable
 class AddIngredient extends StatefulWidget {
@@ -18,7 +21,6 @@ class AddIngredient extends StatefulWidget {
 
 class _AddIngredientState extends State<AddIngredient> {
   final nameCont = TextEditingController();
-  final stockCont = TextEditingController();
   final unitCostCont = TextEditingController();
   final companyNameCont = TextEditingController();
   final supplierNameCont = TextEditingController();
@@ -28,7 +30,6 @@ class _AddIngredientState extends State<AddIngredient> {
     super.initState();
     if (widget.isUpdate == true && widget.ingredientModel != null) {
       nameCont.text = widget.ingredientModel!.name;
-      stockCont.text = widget.ingredientModel!.stock.toString();
       unitCostCont.text = widget.ingredientModel!.unitCost.toString();
       companyNameCont.text = widget.ingredientModel!.companyName;
       supplierNameCont.text = widget.ingredientModel!.supplierName;
@@ -54,12 +55,6 @@ class _AddIngredientState extends State<AddIngredient> {
             ),
             TextFormField(
               decoration: const InputDecoration(
-                labelText: 'Stock',
-              ),
-              controller: stockCont,
-            ),
-            TextFormField(
-              decoration: const InputDecoration(
                 labelText: 'Unit Cost',
               ),
               controller: unitCostCont,
@@ -82,7 +77,6 @@ class _AddIngredientState extends State<AddIngredient> {
                 onPressed: () async {
                   IngredientModel ingredientModel = IngredientModel(
                       name: nameCont.text.trim(),
-                      stock: int.tryParse(stockCont.text.trim()) ?? 0,
                       unitCost: int.tryParse(unitCostCont.text.trim()) ?? 0,
                       companyName: companyNameCont.text.trim(),
                       supplierName: supplierNameCont.text.trim());
@@ -93,9 +87,19 @@ class _AddIngredientState extends State<AddIngredient> {
                         ingredientModel.toMap(),
                         'ingredientId=?',
                         widget.ingredientId!);
+
+                    myCustomSnackBar(
+                        message: 'Ingredient Updated: ${ingredientModel.name}',
+                        warning: false,
+                        context: context);
                   } else {
                     await DatabaseHelper.instance
                         .insertRecord('Ingredients', ingredientModel.toMap());
+
+                    myCustomSnackBar(
+                        message: 'Ingredient Added: ${ingredientModel.name}',
+                        warning: false,
+                        context: context);
                   }
 
                   Navigator.of(context).push(MaterialPageRoute(

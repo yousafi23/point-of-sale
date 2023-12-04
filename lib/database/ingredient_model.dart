@@ -3,7 +3,6 @@ import 'dart:convert';
 
 class IngredientModel {
   final String name;
-  final int stock;
   final int unitCost;
   final String companyName;
   final String supplierName;
@@ -11,7 +10,6 @@ class IngredientModel {
 
   IngredientModel({
     required this.name,
-    required this.stock,
     required this.unitCost,
     required this.companyName,
     required this.supplierName,
@@ -27,7 +25,6 @@ class IngredientModel {
   }) {
     return IngredientModel(
       name: name ?? this.name,
-      stock: stock ?? this.stock,
       unitCost: unitCost ?? this.unitCost,
       companyName: companyName ?? this.companyName,
       supplierName: supplierName ?? this.supplierName,
@@ -37,7 +34,6 @@ class IngredientModel {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      'stock': stock,
       'unitCost': unitCost,
       'companyName': companyName,
       'supplierName': supplierName,
@@ -47,7 +43,6 @@ class IngredientModel {
   factory IngredientModel.fromMap(Map<String, dynamic> map) {
     return IngredientModel(
       name: map['name'] as String,
-      stock: map['stock'] as int,
       unitCost: map['unitCost'] as int,
       companyName: map['companyName'] as String,
       supplierName: map['supplierName'] as String,
@@ -63,7 +58,7 @@ class IngredientModel {
 
   @override
   String toString() {
-    return 'ProductModel(name: $name, stock: $stock, unitCost: $unitCost, companyName: $companyName, supplierName: $supplierName)';
+    return 'ProductModel(name: $name, unitCost: $unitCost, companyName: $companyName, supplierName: $supplierName)';
   }
 
   @override
@@ -71,7 +66,6 @@ class IngredientModel {
     if (identical(this, other)) return true;
 
     return other.name == name &&
-        other.stock == stock &&
         other.unitCost == unitCost &&
         other.companyName == companyName &&
         other.supplierName == supplierName;
@@ -80,7 +74,6 @@ class IngredientModel {
   @override
   int get hashCode {
     return name.hashCode ^
-        stock.hashCode ^
         unitCost.hashCode ^
         companyName.hashCode ^
         supplierName.hashCode;

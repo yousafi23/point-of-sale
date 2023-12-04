@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/general/drawer.dart';
 import 'package:point_of_sale_app/general/my_custom_appbar.dart';
-import 'package:point_of_sale_app/pop-screen/pop-table.dart';
-import 'package:point_of_sale_app/pop-screen/prurchase_selection.dart';
+import 'package:point_of_sale_app/pop_screen/pop_table.dart';
+import 'package:point_of_sale_app/pop_screen/prurchase_selection.dart';
 
 class PopScreen extends StatefulWidget {
   const PopScreen({super.key});

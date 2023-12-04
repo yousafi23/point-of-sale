@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
 
@@ -8,10 +8,7 @@ import 'package:point_of_sale_app/database/purhcase_item_model.dart';
 import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
 
 class PopTableWidget extends StatefulWidget {
-  const PopTableWidget({
-    super.key,
-    required this.reloadCallback,
-  });
+  const PopTableWidget({super.key, required this.reloadCallback});
   final Function reloadCallback;
 
   @override
@@ -44,7 +41,6 @@ class _PopTableWidgetState extends State<PopTableWidget> {
           columns: const [
             DataColumn(label: Text('ID')),
             DataColumn(label: Text('Name')),
-            DataColumn(label: Text('stock')),
             DataColumn(label: Text('Unit Cost')),
             DataColumn(label: Text('companyName')),
             DataColumn(label: Text('supplierName')),
@@ -62,7 +58,6 @@ class _PopTableWidgetState extends State<PopTableWidget> {
                       ingredientModel.name,
                       maxLines: 2,
                     ))),
-                DataCell(Text(ingredientModel.stock.toString())),
                 DataCell(Text(ingredientModel.unitCost.toString())),
                 DataCell(Text(ingredientModel.companyName)),
                 DataCell(Text(ingredientModel.supplierName)),

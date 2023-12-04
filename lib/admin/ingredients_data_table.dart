@@ -5,7 +5,7 @@ import 'package:point_of_sale_app/database/ingredient_model.dart';
 import 'package:point_of_sale_app/general/confirmation_alert.dart';
 
 class IngredientsDataTable extends StatefulWidget {
-  const IngredientsDataTable({Key? key}) : super(key: key);
+  const IngredientsDataTable({super.key});
 
   @override
   _IngredientsDataTableState createState() => _IngredientsDataTableState();
@@ -13,6 +13,7 @@ class IngredientsDataTable extends StatefulWidget {
 
 class _IngredientsDataTableState extends State<IngredientsDataTable> {
   List<Map<String, dynamic>> ingredientsTableData = [];
+  int counter = 1;
 
   @override
   void initState() {
@@ -34,25 +35,31 @@ class _IngredientsDataTableState extends State<IngredientsDataTable> {
     return Column(
       children: [
         DataTable(
+          headingRowColor: MaterialStateColor.resolveWith(
+              (states) => Colors.purple.shade400),
           columns: const [
             DataColumn(label: Text('ID')),
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Unit Cost')),
-            DataColumn(label: Text('Stock')),
             DataColumn(label: Text('Company')),
             DataColumn(label: Text('Supplier')),
             DataColumn(label: Text('')),
             DataColumn(label: Text('')),
           ],
           rows: ingredientsTableData.map<DataRow>((Map<String, dynamic> row) {
+            IngredientModel ingredientModel = IngredientModel.fromMap(row);
+            counter++;
             return DataRow(
+              color: counter.isEven
+                  ? MaterialStateProperty.resolveWith((states) => Colors.white)
+                  : MaterialStateProperty.resolveWith(
+                      (states) => Colors.purple[100]),
               cells: [
-                DataCell(Text(row['ingredientId'].toString())),
-                DataCell(Text(row['name'])),
-                DataCell(Text(row['unitCost'].toString())),
-                DataCell(Text(row['stock'].toString())),
-                DataCell(Text(row['companyName'])),
-                DataCell(Text(row['supplierName'])),
+                DataCell(Text(ingredientModel.ingredientId.toString())),
+                DataCell(Text(ingredientModel.name)),
+                DataCell(Text(ingredientModel.unitCost.toString())),
+                DataCell(Text(ingredientModel.companyName)),
+                DataCell(Text(ingredientModel.supplierName)),
                 DataCell(
                   GestureDetector(
                     child: const Icon(Icons.edit),
@@ -62,7 +69,7 @@ class _IngredientsDataTableState extends State<IngredientsDataTable> {
                             builder: (context) => AddIngredient(
                                   isUpdate: true,
                                   ingredientModel: IngredientModel.fromMap(row),
-                                  ingredientId: row['ingredientId'],
+                                  ingredientId: ingredientModel.ingredientId,
                                 )),
                       );
                     },
@@ -82,7 +89,7 @@ class _IngredientsDataTableState extends State<IngredientsDataTable> {
                         await databaseHelper.deleteRecord(
                           dbTable: 'Ingredients',
                           where: 'ingredientId=?',
-                          id: row['ingredientId'],
+                          id: ingredientModel.ingredientId!,
                         );
                         await _loadData();
                       }
