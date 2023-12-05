@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
+import 'package:point_of_sale_app/database/order_item_model.dart';
 import 'package:point_of_sale_app/database/order_model.dart';
 import 'package:point_of_sale_app/general/confirmation_alert.dart';
 import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
@@ -30,11 +31,12 @@ class _OrderSelectionState extends State<OrderSelection> {
   int serviceCharges = 0;
   int gst = 0;
   int discount = 0;
-  // final discount = TextEditingController();
+
+  int prodDiscount = 0;
+
+  final prodDiscountCont = TextEditingController();
   final discountCont = TextEditingController();
   final serviceChargesCont = TextEditingController();
-
-  // int discount = int.parse(discountCont.text);
 
   @override
   void initState() {
@@ -62,11 +64,9 @@ class _OrderSelectionState extends State<OrderSelection> {
     grandTotal = 0.0;
     total = 0.0;
 
-    // Iterate through each order item and update grandTotal
     for (var item in widget.orderItems) {
-      int itemTotal =
-          item['quantity'] * item['price']; // Calculate total for each item
-      total += itemTotal; // Add item total to grandTotal
+      int itemTotal = item['quantity'] * item['price'];
+      total += itemTotal;
     }
 
     gstAmount = total * (gst / 100);
@@ -94,31 +94,49 @@ class _OrderSelectionState extends State<OrderSelection> {
               DataColumn(label: Text('Unit Price')),
               DataColumn(label: Text('Qty')),
               DataColumn(label: Text('Total')),
+              DataColumn(label: Text('Discount')),
               DataColumn(label: Text('')),
               DataColumn(label: Text('')),
             ],
             rows: widget.orderItems.map<DataRow>((Map<String, dynamic> row) {
+              OrderItemModel orderItemModel = OrderItemModel.fromMap(row);
               return DataRow(
                 cells: [
                   DataCell(SizedBox(
                       width: 100,
                       child: Text(
-                        row['prodName'],
+                        orderItemModel.prodName,
                         maxLines: 2,
                       ))),
-                  DataCell(Text(row['price'].toString())),
-                  DataCell(Text(row['quantity'].toString())),
-                  DataCell(Text((row['quantity'] * row['price']).toString())),
+                  DataCell(Text(orderItemModel.price.toString())),
+                  DataCell(Text(orderItemModel.quantity.toString())),
+                  DataCell(Text((orderItemModel.quantity * orderItemModel.price)
+                      .toString())),
+                  DataCell(
+                    SizedBox(
+                      width: 30,
+                      height: 25,
+                      child: TextField(
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        controller: prodDiscountCont,
+                        onChanged: (value) {
+                          prodDiscount = int.tryParse(value) ?? 0;
+                          calculateGrandTotal();
+                        },
+                      ),
+                    ),
+                  ),
                   DataCell(
                     GestureDetector(
                       child: const Icon(Icons.add),
                       onTap: () async {
                         await DatabaseHelper.instance
-                            .changeQuantity(row['orderItemId'], false);
+                            .changeQuantity(orderItemModel.orderItemId!, false);
 
                         await widget.quantityCallback(
-                            row['productId'], true); //triger
-                        // print('add btn');
+                            orderItemModel.productId, true); //triger
 
                         await _loadData();
                       },
@@ -129,29 +147,22 @@ class _OrderSelectionState extends State<OrderSelection> {
                         child: const Icon(Icons.minimize),
                         onTap: () async {
                           var qty = await DatabaseHelper.instance
-                              .getQuantity(row['orderItemId']);
+                              .getQuantity(orderItemModel.orderItemId!);
 
                           if (qty > 1) {
-                            await DatabaseHelper.instance
-                                .changeQuantity(row['orderItemId'], true);
-
-                            // print('before=${widget.orderItems.length}');
+                            await DatabaseHelper.instance.changeQuantity(
+                                orderItemModel.orderItemId!, true);
 
                             await widget.quantityCallback(
-                                row['productId'], false); //triger
-
-                            // print('after=${widget.orderItems.length}');
-
-                            // print('min btn');
+                                orderItemModel.productId, false); //triger
                           } else {
                             await DatabaseHelper.instance.deleteRecord(
                                 dbTable: "OrderItems",
                                 where: 'orderItemId=?',
-                                id: row['orderItemId']);
+                                id: orderItemModel.orderItemId!);
 
                             await widget.quantityCallback(
-                                row['productId'], false); //triger
-                            // print('deleted');
+                                orderItemModel.productId, false); //triger
 
                             myCustomSnackBar(
                                 message: 'Product Removed',
@@ -160,7 +171,6 @@ class _OrderSelectionState extends State<OrderSelection> {
                           }
 
                           await _loadData();
-                          // print('loaded aft del/min');
                         }),
                   ),
                 ],
