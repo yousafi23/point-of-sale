@@ -105,7 +105,7 @@ class _OrderSelectionState extends State<OrderSelection> {
               DataColumn(label: Text('Unit Price')),
               DataColumn(label: Text('Qty')),
               DataColumn(label: Text('Total')),
-              DataColumn(label: Text('Discount')),
+              DataColumn(label: Text('Discount %')),
               DataColumn(label: Text('')),
               DataColumn(label: Text('')),
             ],
@@ -137,19 +137,27 @@ class _OrderSelectionState extends State<OrderSelection> {
                         onChanged: (value) async {
                           itemDiscount = int.tryParse(value) ?? 0;
 
-                          OrderItemModel newOrderItemModel = orderItemModel
-                              .copyWith(itemDiscount: itemDiscount);
+                          if (itemDiscount <= 100) {
+                            OrderItemModel newOrderItemModel = orderItemModel
+                                .copyWith(itemDiscount: itemDiscount);
 
-                          await DatabaseHelper.instance.updateRecord(
-                              'OrderItems',
-                              newOrderItemModel.toMap(),
-                              'orderItemId=?',
-                              orderItemModel.orderItemId!);
+                            await DatabaseHelper.instance.updateRecord(
+                                'OrderItems',
+                                newOrderItemModel.toMap(),
+                                'orderItemId=?',
+                                orderItemModel.orderItemId!);
 
-                          // print(newOrderItemModel);
+                            // print(newOrderItemModel);
 
-                          calculateGrandTotal();
-                          await _loadData();
+                            calculateGrandTotal();
+                            await _loadData();
+                          } else {
+                            itemDiscountCont.text = '';
+                            myCustomSnackBar(
+                                context: context,
+                                message: 'Discount can NOT be greater than 100',
+                                warning: true);
+                          }
                         },
                       ),
                     ),
