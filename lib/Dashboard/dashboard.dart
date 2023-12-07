@@ -1,17 +1,27 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:point_of_sale_app/database/order_item_model.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/database/order_model.dart';
 import 'package:point_of_sale_app/general/drawer.dart';
 import 'package:point_of_sale_app/general/my_custom_appbar.dart';
 
-class SalesData {
-  SalesData(this.time, this.grandtotal, this.discount);
+class LineData {
+  LineData(this.time, this.grandtotal, this.discount);
   final String time;
-  final double grandtotal;
-  final double discount;
+  final num grandtotal;
+  final num discount;
+}
+
+class PieData {
+  PieData(this.name, this.sold, this.qty);
+  final String name;
+  final num sold;
+  final num qty;
 }
 
 class Dashboard extends StatefulWidget {
@@ -44,14 +54,65 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> _loadOrdersData() async {
     final result = await DatabaseHelper.instance.getOrders(
-        orderBy: '$orderByField $sortByFeild',
-        where: 'orderDate BETWEEN ? AND ?',
-        fromDate: fromDate.toString(),
-        toDate: toDate.toString());
+      orderBy: '$orderByField $sortByFeild',
+      where: 'orderDate BETWEEN ? AND ?',
+      fromDate: fromDate.toString(),
+      toDate: toDate.toString(),
+    );
+    groupByProducts(result!);
 
     setState(() {
       _orders = result!;
     });
+  }
+
+  List<PieData> groupByProducts(List<OrderModel> orders) {
+    List<PieData> groupedList = [];
+    Map<String, Map<String, dynamic>> groupedItems = {};
+
+    for (var order in _orders) {
+      List<Map<String, dynamic>> orderItemsList =
+          List<Map<String, dynamic>>.from(jsonDecode(order.orderItemsList));
+
+      for (var item in orderItemsList) {
+        OrderItemModel orderItem = OrderItemModel.fromMap(item);
+
+        // Check if the product name is already in the grouped map
+        if (groupedItems.containsKey(orderItem.prodName)) {
+          // If yes, update the existing entry
+          groupedItems[orderItem.prodName]!['price'] +=
+              orderItem.price * orderItem.quantity;
+          groupedItems[orderItem.prodName]!['quantity'] += orderItem.quantity;
+        } else {
+          // If not, create a new entry in the grouped map
+          groupedItems[orderItem.prodName] = {
+            'price': orderItem.price * orderItem.quantity,
+            'quantity': orderItem.quantity,
+          };
+        }
+      }
+    }
+
+    List<MapEntry<String, Map<String, dynamic>>> sortedList =
+        groupedItems.entries.toList();
+
+// Sort the list based on 'price'
+    sortedList.sort((a, b) => b.value['price'].compareTo(a.value['price']));
+
+    groupedItems.forEach((prodName, data) {
+      // print(groupedItems.runtimeType);
+      // print('$prodName, ${data['price']}, ${data['quantity']}');
+      groupedList.add(PieData(prodName, data['price'], data['quantity']));
+    });
+
+    for (var entry in sortedList) {
+      String prodName = entry.key;
+      int totalPrice = entry.value['price'];
+      int totalQuantity = entry.value['quantity'];
+      // print('$prodName, $totalPrice, $totalQuantity');
+      groupedList.add(PieData(prodName, totalPrice, totalQuantity));
+    }
+    return groupedList;
   }
 
   String formatFieldName(String input) {
@@ -63,10 +124,10 @@ class _DashboardState extends State<Dashboard> {
     return str;
   }
 
-  List<SalesData> buildData(List<OrderModel> orders) {
-    List<SalesData> ordersList = [];
+  List<LineData> buildData(List<OrderModel> orders) {
+    List<LineData> ordersList = [];
     for (var order in _orders) {
-      ordersList.add(SalesData(order.orderDate.toString(), order.grandTotal,
+      ordersList.add(LineData(order.orderDate.toString(), order.grandTotal,
           (order.total * (order.discountPercent / 100))));
     }
     return ordersList;
@@ -86,34 +147,70 @@ class _DashboardState extends State<Dashboard> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 600,
-            child: SfCartesianChart(
-                primaryXAxis: CategoryAxis(),
-                // title: ChartTitle(text: 'Grand Total'),
-                // legend: const Legend(isVisible: true),
-                tooltipBehavior: TooltipBehavior(
-                  enable: true,
-                  format: 'point.x || point.y',
-                  header: 'Grand Total',
-                  // builder: (data, point, series, pointIndex, seriesIndex) {
-                  //   return Container(
-                  //     padding: const EdgeInsets.all(5),
-                  //     child: Text('${point.x} : ${point.y}',
-                  //         style: const TextStyle(color: Colors.white)),
-                  //   );
-                  // },
+          Row(
+            children: [
+              SizedBox(
+                width: 600,
+                child: SfCartesianChart(
+                    primaryXAxis: CategoryAxis(),
+                    // title: ChartTitle(text: 'Grand Total'),
+                    // legend: const Legend(isVisible: true),
+                    tooltipBehavior: TooltipBehavior(
+                      enable: true,
+                      format: 'point.x || point.y',
+                      header: 'Grand Total',
+                      // builder: (data, point, series, pointIndex, seriesIndex) {
+                      //   return Container(
+                      //     padding: const EdgeInsets.all(5),
+                      //     child: Text('${point.x} : ${point.y}',
+                      //         style: const TextStyle(color: Colors.white)),
+                      //   );
+                      // },
+                    ),
+                    series: <LineSeries<LineData, String>>[
+                      LineSeries<LineData, String>(
+                          dataSource: buildData(_orders),
+                          xValueMapper: (LineData sales, _) => sales.time,
+                          yValueMapper: (LineData sales, _) =>
+                              sales.grandtotal),
+                      LineSeries<LineData, String>(
+                          dataSource: buildData(_orders),
+                          xValueMapper: (LineData sales, _) => sales.time,
+                          yValueMapper: (LineData sales, _) => sales.discount),
+                    ]),
+              ),
+              SizedBox(
+                width: 600,
+                child: SfCircularChart(
+                  series: <CircularSeries>[
+                    PieSeries<PieData, String>(
+                      dataSource: groupByProducts(_orders),
+                      // pointColorMapper: (PieData data, _) => data.qty,
+                      xValueMapper: (PieData data, _) => data.name,
+                      yValueMapper: (PieData data, _) => data.sold,
+                      dataLabelMapper: (PieData data, _) => data.name,
+                      dataLabelSettings: const DataLabelSettings(
+                        isVisible: true,
+                        labelPosition: ChartDataLabelPosition.outside,
+                        textStyle: TextStyle(),
+                        connectorLineSettings:
+                            ConnectorLineSettings(type: ConnectorType.curve),
+                        // overflowMode: OverflowMode.none
+                        // useSeriesColor: true,
+                      ),
+                      explode: true,
+                      // explodeAll: true,
+                      explodeGesture: ActivationMode.singleTap,
+                      groupMode: CircularChartGroupMode.point,
+                      // As the grouping mode is point, 2 points will be grouped
+                      groupTo: 5,
+                      enableTooltip: true,
+                    )
+                  ],
+                  tooltipBehavior: TooltipBehavior(enable: true),
                 ),
-                series: <LineSeries<SalesData, String>>[
-                  LineSeries<SalesData, String>(
-                      dataSource: buildData(_orders),
-                      xValueMapper: (SalesData sales, _) => sales.time,
-                      yValueMapper: (SalesData sales, _) => sales.grandtotal),
-                  LineSeries<SalesData, String>(
-                      dataSource: buildData(_orders),
-                      xValueMapper: (SalesData sales, _) => sales.time,
-                      yValueMapper: (SalesData sales, _) => sales.discount),
-                ]),
+              )
+            ],
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),

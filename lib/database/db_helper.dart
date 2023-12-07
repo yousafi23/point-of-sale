@@ -8,7 +8,7 @@ import 'package:point_of_sale_app/database/user_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
-  static const dbName = 'sqliteNew.db';
+  static const dbName = 'sqlite.db';
   static const dbVersion = 1;
 
   static final DatabaseHelper instance = DatabaseHelper();
@@ -45,6 +45,7 @@ class DatabaseHelper {
       prodName TEXT NOT NULL,
       price INT NOT NULL,
       quantity INT NOT NULL,
+      itemDiscount INT,
       productId INTEGER,
       FOREIGN KEY (productId) REFERENCES Products (productId)
     )''');
@@ -238,16 +239,16 @@ class DatabaseHelper {
       int? limit,
       String? where,
       String? fromDate,
-      String? toDate}) async {
+      String? toDate,
+     }) async {
     final db = await database;
-    final result = await db?.query('Orders',
-        orderBy: orderBy,
-        limit: limit,
-        where: where,
-        whereArgs:
-            fromDate == null && toDate == null
-            ? null
-            : [fromDate, toDate]);
+    final result = await db?.query(
+      'Orders',
+      orderBy: orderBy,
+      limit: limit,
+      where: where,
+      whereArgs: fromDate == null && toDate == null ? null : [fromDate, toDate],
+    );
     return result?.map((jsonOrder) {
       return OrderModel.fromJson(jsonOrder);
     }).toList();

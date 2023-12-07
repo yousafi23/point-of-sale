@@ -6,12 +6,16 @@ class OrderItemModel {
   final String prodName;
   final int price;
   final int quantity;
+  final int? itemDiscount;
+  final int? orderItemId;
 
   OrderItemModel({
     required this.productId,
     required this.prodName,
     required this.price,
     required this.quantity,
+    this.itemDiscount,
+    this.orderItemId,
   });
 
   OrderItemModel copyWith({
@@ -19,12 +23,16 @@ class OrderItemModel {
     String? prodName,
     int? price,
     int? quantity,
+    int? itemDiscount,
+    int? orderItemId,
   }) {
     return OrderItemModel(
       productId: productId ?? this.productId,
       prodName: prodName ?? this.prodName,
       price: price ?? this.price,
       quantity: quantity ?? this.quantity,
+      itemDiscount: itemDiscount ?? this.itemDiscount,
+      orderItemId: orderItemId ?? this.orderItemId,
     );
   }
 
@@ -34,6 +42,8 @@ class OrderItemModel {
       'prodName': prodName,
       'price': price,
       'quantity': quantity,
+      'itemDiscount': itemDiscount,
+      'orderItemId': orderItemId,
     };
   }
 
@@ -43,6 +53,10 @@ class OrderItemModel {
       prodName: map['prodName'] as String,
       price: map['price'] as int,
       quantity: map['quantity'] as int,
+      itemDiscount:
+          map['itemDiscount'] != null ? map['itemDiscount'] as int : null,
+      orderItemId:
+          map['orderItemId'] != null ? map['orderItemId'] as int : null,
     );
   }
 
@@ -53,7 +67,7 @@ class OrderItemModel {
 
   @override
   String toString() {
-    return 'OrderItemModel(productId: $productId, prodName: $prodName, price: $price, quantity: $quantity)';
+    return 'OrderItemModel(productId: $productId, prodName: $prodName, price: $price, quantity: $quantity, itemDiscount: $itemDiscount, orderItemId: $orderItemId)';
   }
 
   @override
@@ -63,7 +77,9 @@ class OrderItemModel {
     return other.productId == productId &&
         other.prodName == prodName &&
         other.price == price &&
-        other.quantity == quantity;
+        other.quantity == quantity &&
+        other.itemDiscount == itemDiscount &&
+        other.orderItemId == orderItemId;
   }
 
   @override
@@ -71,6 +87,8 @@ class OrderItemModel {
     return productId.hashCode ^
         prodName.hashCode ^
         price.hashCode ^
-        quantity.hashCode;
+        quantity.hashCode ^
+        itemDiscount.hashCode ^
+        orderItemId.hashCode;
   }
 }
