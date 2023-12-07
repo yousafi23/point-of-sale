@@ -44,6 +44,7 @@ dependencies:
   fl_chart: ^0.65.0
   jiffy: ^6.2.1
   syncfusion_flutter_charts: ^23.2.7
+  google_fonts: ^6.1.0
 
 dev_dependencies:
   flutter_test:

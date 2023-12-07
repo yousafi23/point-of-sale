@@ -7,6 +7,13 @@ import 'package:point_of_sale_app/database/order_model.dart';
 import 'package:point_of_sale_app/general/drawer.dart';
 import 'package:point_of_sale_app/general/my_custom_appbar.dart';
 
+class SalesData {
+  SalesData(this.time, this.grandtotal, this.discount);
+  final String time;
+  final double grandtotal;
+  final double discount;
+}
+
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
 
@@ -56,6 +63,15 @@ class _DashboardState extends State<Dashboard> {
     return str;
   }
 
+  List<SalesData> buildData(List<OrderModel> orders) {
+    List<SalesData> ordersList = [];
+    for (var order in _orders) {
+      ordersList.add(SalesData(order.orderDate.toString(), order.grandTotal,
+          (order.total * (order.discountPercent / 100))));
+    }
+    return ordersList;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,32 +84,66 @@ class _DashboardState extends State<Dashboard> {
         const Color.fromARGB(255, 116, 2, 122),
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
+          SizedBox(
+            width: 600,
+            child: SfCartesianChart(
+                primaryXAxis: CategoryAxis(),
+                // title: ChartTitle(text: 'Grand Total'),
+                // legend: const Legend(isVisible: true),
+                tooltipBehavior: TooltipBehavior(
+                  enable: true,
+                  format: 'point.x || point.y',
+                  header: 'Grand Total',
+                  // builder: (data, point, series, pointIndex, seriesIndex) {
+                  //   return Container(
+                  //     padding: const EdgeInsets.all(5),
+                  //     child: Text('${point.x} : ${point.y}',
+                  //         style: const TextStyle(color: Colors.white)),
+                  //   );
+                  // },
+                ),
+                series: <LineSeries<SalesData, String>>[
+                  LineSeries<SalesData, String>(
+                      dataSource: buildData(_orders),
+                      xValueMapper: (SalesData sales, _) => sales.time,
+                      yValueMapper: (SalesData sales, _) => sales.grandtotal),
+                  LineSeries<SalesData, String>(
+                      dataSource: buildData(_orders),
+                      xValueMapper: (SalesData sales, _) => sales.time,
+                      yValueMapper: (SalesData sales, _) => sales.discount),
+                ]),
+          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Text('Sort By '),
-                DropdownButton<String>(
-                  underline: const SizedBox(),
-                  focusColor: Colors.transparent,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.black),
-                  value: orderByField,
-                  onChanged: (value) {
-                    setState(() {
-                      orderByField = value!;
-                      _loadOrdersData();
-                    });
-                  },
-                  items: dropDownItemsList
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(formatFieldName(value)),
-                    );
-                  }).toList(),
+                const Text('Sort By\t'),
+                SizedBox(
+                  height: 20,
+                  child: DropdownButton<String>(
+                    underline: const SizedBox(),
+                    focusColor: Colors.transparent,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.black),
+                    value: orderByField,
+                    onChanged: (value) {
+                      setState(() {
+                        orderByField = value!;
+                        _loadOrdersData();
+                      });
+                    },
+                    items: dropDownItemsList
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(formatFieldName(value)),
+                      );
+                    }).toList(),
+                  ),
                 ),
                 Tooltip(
                   message: 'High to Low',
@@ -118,7 +168,7 @@ class _DashboardState extends State<Dashboard> {
                       }),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.fromLTRB(15, 5, 5, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -127,9 +177,20 @@ class _DashboardState extends State<Dashboard> {
                         style: TextStyle(fontSize: 12),
                       ),
                       GestureDetector(
-                        child: Text(
-                          DateFormat('d MMM yyyy').format(fromDate),
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: Colors.purple.shade200,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(2, 0, 2, 0),
+                            child: Text(
+                              DateFormat('d MMM yyyy').format(fromDate),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ),
                         onTap: () async {
                           fromDate = (await showDatePicker(
@@ -144,7 +205,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.fromLTRB(5, 5, 15, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -153,9 +214,19 @@ class _DashboardState extends State<Dashboard> {
                         style: TextStyle(fontSize: 12),
                       ),
                       GestureDetector(
-                        child: Text(
-                          DateFormat('d MMM yyyy').format(toDate),
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: Colors.purple.shade200,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(2, 0, 2, 0),
+                            child: Text(
+                              DateFormat('d MMM yyyy').format(toDate),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         ),
                         onTap: () async {
                           toDate = (await showDatePicker(
@@ -172,7 +243,8 @@ class _DashboardState extends State<Dashboard> {
                 ElevatedButton(
                     onPressed: () => _loadOrdersData(),
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.purple.shade500),
+                        backgroundColor: Colors.purple.shade500,
+                        foregroundColor: Colors.white),
                     child: const Text('Filter')),
               ],
             ),

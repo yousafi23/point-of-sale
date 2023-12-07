@@ -244,7 +244,10 @@ class DatabaseHelper {
         orderBy: orderBy,
         limit: limit,
         where: where,
-        whereArgs: [fromDate, toDate]);
+        whereArgs:
+            fromDate == null && toDate == null
+            ? null
+            : [fromDate, toDate]);
     return result?.map((jsonOrder) {
       return OrderModel.fromJson(jsonOrder);
     }).toList();
