@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/database/order_model.dart';
 import 'package:point_of_sale_app/general/drawer.dart';
@@ -68,6 +69,7 @@ class _DashboardState extends State<Dashboard> {
       ),
       body: Column(
         children: [
+
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
