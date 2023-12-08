@@ -45,6 +45,10 @@ dependencies:
   jiffy: ^6.2.1
   syncfusion_flutter_charts: ^23.2.7
   google_fonts: ^6.1.0
+  excel: ^4.0.0
+  syncfusion_flutter_xlsio: ^23.2.7
+  open_file: ^3.3.2
+  universal_html: ^2.2.4
 
 dev_dependencies:
   flutter_test:

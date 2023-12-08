@@ -1,14 +1,22 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:point_of_sale_app/database/order_item_model.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xl;
+
 import 'package:point_of_sale_app/database/db_helper.dart';
+import 'package:point_of_sale_app/database/order_item_model.dart';
 import 'package:point_of_sale_app/database/order_model.dart';
 import 'package:point_of_sale_app/general/drawer.dart';
 import 'package:point_of_sale_app/general/my_custom_appbar.dart';
+import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
 
 class LineData {
   LineData(this.time, this.grandtotal, this.discount);
@@ -129,6 +137,76 @@ class _DashboardState extends State<Dashboard> {
           (order.total * (order.discountPercent / 100))));
     }
     return ordersList;
+  }
+
+  Future<void> exportAsExcel(
+      List<OrderModel> orders, BuildContext context) async {
+    final xl.Workbook workbook = xl.Workbook();
+    final xl.Worksheet sheet = workbook.worksheets[0];
+
+    List<String> headings = [
+      'orderDate',
+      'orderItemsList',
+      'total',
+      'serviceCharges',
+      'gstPercent',
+      'discountPercent',
+      'grandTotal',
+    ];
+
+    //adding headings
+    for (int colIndex = 0; colIndex < headings.length; colIndex++) {
+      sheet.getRangeByIndex(1, colIndex + 1).setText(headings[colIndex]);
+      //styling headings
+      sheet.setColumnWidthInPixels(colIndex + 1, 100);
+      xl.Style headingStyle = sheet.getRangeByIndex(1, colIndex + 1).cellStyle;
+      headingStyle.bold = true;
+      headingStyle.fontSize = 15;
+    }
+
+    // Add data rows
+    for (int rowIndex = 0; rowIndex < _orders.length; rowIndex++) {
+      OrderModel order = _orders[rowIndex];
+      Map<String, dynamic> orderMap = order.toMap();
+      for (int colIndex = 0; colIndex < headings.length; colIndex++) {
+        sheet.getRangeByIndex(rowIndex + 2, colIndex + 1).setText(
+              orderMap[headings[colIndex]].toString(),
+            );
+      }
+    }
+
+    //saving file
+    final List<int> bytes = workbook.saveAsStream();
+    //freeing memory
+    workbook.dispose();
+
+    final Directory? downloadsDir = await getDownloadsDirectory();
+    if (downloadsDir != null) {
+      try {
+        String path = downloadsDir.path;
+        final String fileName =
+            '$path/${DateFormat('d_MMM_yyyy').format(fromDate)} To ${DateFormat('d_MMM_yyyy').format(toDate)}.xlsx';
+        final File file = File(fileName);
+        await file.writeAsBytes(bytes, flush: true);
+        myCustomSnackBar(
+            context: context,
+            message: 'Saved to:  $fileName',
+            warning: false,
+            duration: 6);
+        OpenFile.open(fileName);
+      } on Exception catch (e) {
+        myCustomSnackBar(
+            context: context,
+            message: e.toString(),
+            warning: true,
+            duration: 15);
+      }
+    } else {
+      myCustomSnackBar(
+          context: context,
+          message: 'Error: Unable to get the downloads directory.',
+          warning: true);
+    }
   }
 
   @override
@@ -341,147 +419,159 @@ class _DashboardState extends State<Dashboard> {
                         backgroundColor: Colors.purple.shade500,
                         foregroundColor: Colors.white),
                     child: const Text('Filter')),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                  child: ElevatedButton.icon(
+                      onPressed: () => exportAsExcel(_orders, context),
+                      icon: const Icon(Icons.download),
+                      label: const Text('Export as Excel')),
+                ),
               ],
             ),
           ),
-          Expanded(
-            child: _orders.isEmpty
-                ? const Center(
-                    child: Text('No orders available.'),
-                  )
-                : Center(
-                    child: SizedBox(
-                      width: 500,
-                      child: ListView.builder(
-                        itemCount: _orders.length,
-                        itemBuilder: (context, index) {
-                          final order = _orders[index];
-                          List<Map<String, dynamic>> orderItemsList =
-                              List<Map<String, dynamic>>.from(
-                                  jsonDecode(order.orderItemsList));
+          SizedBox(
+            height: 200,
+            child: Row(
+              children: [
+                _orders.isEmpty
+                    ? const Center(
+                        child: Text('No orders available.'),
+                      )
+                    : SizedBox(
+                        width: 500,
+                        child: ListView.builder(
+                          itemCount: _orders.length,
+                          itemBuilder: (context, index) {
+                            final order = _orders[index];
+                            List<Map<String, dynamic>> orderItemsList =
+                                List<Map<String, dynamic>>.from(
+                                    jsonDecode(order.orderItemsList));
 
-                          double gstAmount =
-                              order.total * (order.gstPercent / 100);
-                          double discountAmount =
-                              order.total * (order.discountPercent / 100);
+                            double gstAmount =
+                                order.total * (order.gstPercent / 100);
+                            double discountAmount =
+                                order.total * (order.discountPercent / 100);
 
-                          return Card(
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: ExpansionTile(
-                              shape: const Border(),
-                              title: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('${order.orderId}',
-                                      style: const TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold)),
-                                  Text(
-                                    textAlign: TextAlign.start,
-                                    DateFormat('dd-MMM-yy h:mm a')
-                                        .format(order.orderDate),
-                                    style: const TextStyle(fontSize: 13),
-                                  ),
-                                  Text(
-                                      textAlign: TextAlign.end,
-                                      order.grandTotal.toString(),
-                                      style: const TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold)),
-                                ],
+                            return Card(
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
                               ),
-                              children: [
-                                for (var item in orderItemsList)
-                                  Padding(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(15, 0, 25, 0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        SizedBox(
-                                          width: 140,
-                                          child: Text(
-                                            '${item['prodName']}',
+                              child: ExpansionTile(
+                                shape: const Border(),
+                                title: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('${order.orderId}',
+                                        style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold)),
+                                    Text(
+                                      textAlign: TextAlign.start,
+                                      DateFormat('dd-MMM-yy h:mm a')
+                                          .format(order.orderDate),
+                                      style: const TextStyle(fontSize: 13),
+                                    ),
+                                    Text(
+                                        textAlign: TextAlign.end,
+                                        order.grandTotal.toString(),
+                                        style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                                children: [
+                                  for (var item in orderItemsList)
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          15, 0, 25, 0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          SizedBox(
+                                            width: 140,
+                                            child: Text(
+                                              '${item['prodName']}',
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          Text(
+                                            '${item['price']} x ${item['quantity']} = ${item['price'] * item['quantity']}',
                                             overflow: TextOverflow.ellipsis,
                                           ),
+                                        ],
+                                      ),
+                                    ),
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        15, 0, 25, 10),
+                                    child: Column(
+                                      children: [
+                                        const Divider(
+                                            color:
+                                                Color.fromARGB(255, 67, 2, 80)),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            const Text('Total'),
+                                            Text(order.total.toStringAsFixed(1))
+                                          ],
                                         ),
-                                        Text(
-                                          '${item['price']} x ${item['quantity']} = ${item['price'] * item['quantity']}',
-                                          overflow: TextOverflow.ellipsis,
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            const Text('GST'),
+                                            Text(
+                                                '${order.gstPercent}% = ${gstAmount.toStringAsFixed(1)}')
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            const Text('Discount '),
+                                            Text(
+                                              '${order.discountPercent}% = ${discountAmount.toStringAsFixed(1)}',
+                                              style: const TextStyle(
+                                                  color: Colors.redAccent),
+                                            )
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            const Text('Service Charges'),
+                                            Text(
+                                                order.serviceCharges.toString())
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            Text(order.grandTotal.toString(),
+                                                style: const TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                          ],
                                         ),
                                       ],
                                     ),
                                   ),
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(15, 0, 25, 10),
-                                  child: Column(
-                                    children: [
-                                      const Divider(
-                                          color:
-                                              Color.fromARGB(255, 67, 2, 80)),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          const Text('Total'),
-                                          Text(order.total.toStringAsFixed(1))
-                                        ],
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          const Text('GST'),
-                                          Text(
-                                              '${order.gstPercent}% = ${gstAmount.toStringAsFixed(1)}')
-                                        ],
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          const Text('Discount '),
-                                          Text(
-                                            '${order.discountPercent}% = ${discountAmount.toStringAsFixed(1)}',
-                                            style: const TextStyle(
-                                                color: Colors.redAccent),
-                                          )
-                                        ],
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          const Text('Service Charges'),
-                                          Text(order.serviceCharges.toString())
-                                        ],
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          Text(order.grandTotal.toString(),
-                                              style: const TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.bold)),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ),
+              ],
+            ),
           ),
         ],
       ),
