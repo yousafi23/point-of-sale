@@ -220,360 +220,362 @@ class _DashboardState extends State<Dashboard> {
         "Dashboard",
         const Color.fromARGB(255, 116, 2, 122),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              SizedBox(
-                width: 600,
-                child: SfCartesianChart(
-                    primaryXAxis: CategoryAxis(),
-                    // title: ChartTitle(text: 'Grand Total'),
-                    // legend: const Legend(isVisible: true),
-                    tooltipBehavior: TooltipBehavior(
-                      enable: true,
-                      format: 'point.x || point.y',
-                      header: 'Grand Total',
-                      // builder: (data, point, series, pointIndex, seriesIndex) {
-                      //   return Container(
-                      //     padding: const EdgeInsets.all(5),
-                      //     child: Text('${point.x} : ${point.y}',
-                      //         style: const TextStyle(color: Colors.white)),
-                      //   );
-                      // },
-                    ),
-                    series: <LineSeries<LineData, String>>[
-                      LineSeries<LineData, String>(
-                          dataSource: buildData(_orders),
-                          xValueMapper: (LineData sales, _) => sales.time,
-                          yValueMapper: (LineData sales, _) =>
-                              sales.grandtotal),
-                      LineSeries<LineData, String>(
-                          dataSource: buildData(_orders),
-                          xValueMapper: (LineData sales, _) => sales.time,
-                          yValueMapper: (LineData sales, _) => sales.discount),
-                    ]),
-              ),
-              SizedBox(
-                width: 600,
-                child: SfCircularChart(
-                  series: <CircularSeries>[
-                    PieSeries<PieData, String>(
-                      dataSource: groupByProducts(_orders),
-                      // pointColorMapper: (PieData data, _) => data.qty,
-                      xValueMapper: (PieData data, _) => data.name,
-                      yValueMapper: (PieData data, _) => data.sold,
-                      dataLabelMapper: (PieData data, _) => data.name,
-                      dataLabelSettings: const DataLabelSettings(
-                        isVisible: true,
-                        labelPosition: ChartDataLabelPosition.outside,
-                        textStyle: TextStyle(),
-                        connectorLineSettings:
-                            ConnectorLineSettings(type: ConnectorType.curve),
-                        // overflowMode: OverflowMode.none
-                        // useSeriesColor: true,
-                      ),
-                      explode: true,
-                      // explodeAll: true,
-                      explodeGesture: ActivationMode.singleTap,
-                      groupMode: CircularChartGroupMode.point,
-                      // As the grouping mode is point, 2 points will be grouped
-                      groupTo: 5,
-                      enableTooltip: true,
-                    )
-                  ],
-                  tooltipBehavior: TooltipBehavior(enable: true),
-                ),
-              )
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.center,
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                const Text('Sort By\t'),
                 SizedBox(
-                  height: 20,
-                  child: DropdownButton<String>(
-                    underline: const SizedBox(),
-                    focusColor: Colors.transparent,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.black),
-                    value: orderByField,
-                    onChanged: (value) {
-                      setState(() {
-                        orderByField = value!;
-                        _loadOrdersData();
-                      });
-                    },
-                    items: dropDownItemsList
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(formatFieldName(value)),
-                      );
-                    }).toList(),
-                  ),
-                ),
-                Tooltip(
-                  message: 'High to Low',
-                  child: GestureDetector(
-                      child: const Icon(Icons.arrow_upward_rounded),
-                      onTap: () {
-                        setState(() {
-                          sortByFeild = 'DESC';
-                          _loadOrdersData();
-                        });
-                      }),
-                ),
-                Tooltip(
-                  message: 'Low to High',
-                  child: GestureDetector(
-                      child: const Icon(Icons.arrow_downward_rounded),
-                      onTap: () {
-                        setState(() {
-                          sortByFeild = 'ASC';
-                          _loadOrdersData();
-                        });
-                      }),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 5, 5, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'from ',
-                        style: TextStyle(fontSize: 12),
+                  width: 600,
+                  child: SfCartesianChart(
+                      primaryXAxis: CategoryAxis(),
+                      // title: ChartTitle(text: 'Grand Total'),
+                      // legend: const Legend(isVisible: true),
+                      tooltipBehavior: TooltipBehavior(
+                        enable: true,
+                        format: 'point.x || point.y',
+                        header: 'Grand Total',
+                        // builder: (data, point, series, pointIndex, seriesIndex) {
+                        //   return Container(
+                        //     padding: const EdgeInsets.all(5),
+                        //     child: Text('${point.x} : ${point.y}',
+                        //         style: const TextStyle(color: Colors.white)),
+                        //   );
+                        // },
                       ),
-                      GestureDetector(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            color: Colors.purple.shade200,
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(2, 0, 2, 0),
-                            child: Text(
-                              DateFormat('d MMM yyyy').format(fromDate),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
+                      series: <LineSeries<LineData, String>>[
+                        LineSeries<LineData, String>(
+                            dataSource: buildData(_orders),
+                            xValueMapper: (LineData sales, _) => sales.time,
+                            yValueMapper: (LineData sales, _) =>
+                                sales.grandtotal),
+                        LineSeries<LineData, String>(
+                            dataSource: buildData(_orders),
+                            xValueMapper: (LineData sales, _) => sales.time,
+                            yValueMapper: (LineData sales, _) =>
+                                sales.discount),
+                      ]),
+                ),
+                SizedBox(
+                  width: 600,
+                  child: SfCircularChart(
+                    series: <CircularSeries>[
+                      PieSeries<PieData, String>(
+                        dataSource: groupByProducts(_orders),
+                        // pointColorMapper: (PieData data, _) => data.qty,
+                        xValueMapper: (PieData data, _) => data.name,
+                        yValueMapper: (PieData data, _) => data.sold,
+                        dataLabelMapper: (PieData data, _) => data.name,
+                        dataLabelSettings: const DataLabelSettings(
+                          isVisible: true,
+                          labelPosition: ChartDataLabelPosition.outside,
+                          textStyle: TextStyle(),
+                          connectorLineSettings:
+                              ConnectorLineSettings(type: ConnectorType.curve),
+                          // overflowMode: OverflowMode.none
+                          // useSeriesColor: true,
                         ),
-                        onTap: () async {
-                          fromDate = (await showDatePicker(
-                              context: context,
-                              initialDate: fromDate,
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime.now()))!;
-                          setState(() {});
-                        },
-                      ),
+                        explode: true,
+                        // explodeAll: true,
+                        explodeGesture: ActivationMode.singleTap,
+                        groupMode: CircularChartGroupMode.point,
+                        // As the grouping mode is point, 2 points will be grouped
+                        // groupTo: 5,
+                        enableTooltip: true,
+                      )
                     ],
+                    tooltipBehavior: TooltipBehavior(enable: true),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(5, 5, 15, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'To ',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      GestureDetector(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            color: Colors.purple.shade200,
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(2, 0, 2, 0),
-                            child: Text(
-                              DateFormat('d MMM yyyy').format(toDate),
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        onTap: () async {
-                          toDate = (await showDatePicker(
-                              context: context,
-                              initialDate: toDate,
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime.now()))!;
-                          setState(() {});
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                ElevatedButton(
-                    onPressed: () => _loadOrdersData(),
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.purple.shade500,
-                        foregroundColor: Colors.white),
-                    child: const Text('Filter')),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                  child: ElevatedButton.icon(
-                      onPressed: () => exportAsExcel(_orders, context),
-                      icon: const Icon(Icons.download),
-                      label: const Text('Export as Excel')),
-                ),
+                )
               ],
             ),
-          ),
-          SizedBox(
-            height: 200,
-            child: Row(
-              children: [
-                _orders.isEmpty
-                    ? const Center(
-                        child: Text('No orders available.'),
-                      )
-                    : SizedBox(
-                        width: 500,
-                        child: ListView.builder(
-                          itemCount: _orders.length,
-                          itemBuilder: (context, index) {
-                            final order = _orders[index];
-                            List<Map<String, dynamic>> orderItemsList =
-                                List<Map<String, dynamic>>.from(
-                                    jsonDecode(order.orderItemsList));
-
-                            double gstAmount =
-                                order.total * (order.gstPercent / 100);
-                            double discountAmount =
-                                order.total * (order.discountPercent / 100);
-
-                            return Card(
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
+            Container(
+              color: Colors.purple.shade50,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Sort By\t'),
+                    SizedBox(
+                      height: 20,
+                      child: DropdownButton<String>(
+                        underline: const SizedBox(),
+                        focusColor: Colors.transparent,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.black),
+                        value: orderByField,
+                        onChanged: (value) {
+                          setState(() {
+                            orderByField = value!;
+                            _loadOrdersData();
+                          });
+                        },
+                        items: dropDownItemsList
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(formatFieldName(value)),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    Tooltip(
+                      message: 'High to Low',
+                      child: GestureDetector(
+                          child: const Icon(Icons.arrow_upward_rounded),
+                          onTap: () {
+                            setState(() {
+                              sortByFeild = 'DESC';
+                              _loadOrdersData();
+                            });
+                          }),
+                    ),
+                    Tooltip(
+                      message: 'Low to High',
+                      child: GestureDetector(
+                          child: const Icon(Icons.arrow_downward_rounded),
+                          onTap: () {
+                            setState(() {
+                              sortByFeild = 'ASC';
+                              _loadOrdersData();
+                            });
+                          }),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(15, 5, 5, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'from ',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          GestureDetector(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                                color: Colors.purple.shade200,
                               ),
-                              child: ExpansionTile(
-                                shape: const Border(),
-                                title: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text('${order.orderId}',
-                                        style: const TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold)),
-                                    Text(
-                                      textAlign: TextAlign.start,
-                                      DateFormat('dd-MMM-yy h:mm a')
-                                          .format(order.orderDate),
-                                      style: const TextStyle(fontSize: 13),
-                                    ),
-                                    Text(
-                                        textAlign: TextAlign.end,
-                                        order.grandTotal.toString(),
-                                        style: const TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold)),
-                                  ],
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(2, 0, 2, 0),
+                                child: Text(
+                                  DateFormat('d MMM yyyy').format(fromDate),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                                children: [
-                                  for (var item in orderItemsList)
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                          15, 0, 25, 0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          SizedBox(
-                                            width: 140,
-                                            child: Text(
-                                              '${item['prodName']}',
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                          Text(
-                                            '${item['price']} x ${item['quantity']} = ${item['price'] * item['quantity']}',
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        15, 0, 25, 10),
-                                    child: Column(
+                              ),
+                            ),
+                            onTap: () async {
+                              fromDate = (await showDatePicker(
+                                  context: context,
+                                  initialDate: fromDate,
+                                  firstDate: DateTime(2000),
+                                  lastDate: DateTime.now()))!;
+                              setState(() {});
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(5, 5, 15, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'To ',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          GestureDetector(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                                color: Colors.purple.shade200,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(2, 0, 2, 0),
+                                child: Text(
+                                  DateFormat('d MMM yyyy').format(toDate),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                            onTap: () async {
+                              toDate = (await showDatePicker(
+                                  context: context,
+                                  initialDate: toDate,
+                                  firstDate: DateTime(2000),
+                                  lastDate: DateTime.now()))!;
+                              setState(() {});
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    ElevatedButton(
+                        onPressed: () => _loadOrdersData(),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.purple.shade500,
+                            foregroundColor: Colors.white),
+                        child: const Text('Filter')),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                      child: ElevatedButton.icon(
+                          onPressed: () => exportAsExcel(_orders, context),
+                          icon: const Icon(Icons.download),
+                          label: const Text('Export as Excel')),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: _orders.isEmpty
+                  ? const Center(
+                      child: Text('No orders available.'),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 300.0, // maximum width
+                          mainAxisSpacing: 10.0,
+                          crossAxisSpacing: 10.0,
+                        ),
+                        itemCount: _orders.length,
+                        itemBuilder: (context, index) {
+                          final order = _orders[index];
+                          List<Map<String, dynamic>> orderItemsList =
+                              List<Map<String, dynamic>>.from(
+                                  jsonDecode(order.orderItemsList));
+
+                          double gstAmount =
+                              order.total * (order.gstPercent / 100);
+                          double discountAmount =
+                              order.total * (order.discountPercent / 100);
+
+                          return Card(
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15)),
+                            child: SingleChildScrollView(
+                              child: Padding(
+                                padding: const EdgeInsets.all(15.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        const Divider(
-                                            color:
-                                                Color.fromARGB(255, 67, 2, 80)),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            const Text('Total'),
-                                            Text(order.total.toStringAsFixed(1))
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            const Text('GST'),
-                                            Text(
-                                                '${order.gstPercent}% = ${gstAmount.toStringAsFixed(1)}')
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            const Text('Discount '),
-                                            Text(
-                                              '${order.discountPercent}% = ${discountAmount.toStringAsFixed(1)}',
-                                              style: const TextStyle(
-                                                  color: Colors.redAccent),
-                                            )
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            const Text('Service Charges'),
-                                            Text(
-                                                order.serviceCharges.toString())
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            Text(order.grandTotal.toString(),
-                                                style: const TextStyle(
-                                                    fontSize: 15,
-                                                    fontWeight:
-                                                        FontWeight.bold)),
-                                          ],
-                                        ),
+                                        Text('${order.orderId}',
+                                            style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold)),
+                                        Text(
+                                            DateFormat('dd-MM-yy - h:mm a')
+                                                .format(order.orderDate),
+                                            style:
+                                                const TextStyle(fontSize: 12)),
                                       ],
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 10),
+                                    Column(
+                                      children: orderItemsList.map((item) {
+                                        return Tooltip(
+                                          decoration: BoxDecoration(
+                                              color: Colors.purple[600],
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                      Radius.circular(5))),
+                                          message:
+                                              '${item['prodName']}\n${item['price']} x ${item['quantity']} = ${item['price'] * item['quantity']}',
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              SizedBox(
+                                                width: 140,
+                                                child: Text(
+                                                  '${item['prodName']}',
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              Text(
+                                                '${item['price']} x ${item['quantity']} = ${item['price'] * item['quantity']}',
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                    Divider(color: Colors.purple[800]),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text('Total'),
+                                        Text(order.total.toStringAsFixed(1))
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text('GST'),
+                                        Text(
+                                            '${order.gstPercent}% = ${gstAmount.toStringAsFixed(1)}')
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text('Discount '),
+                                        Text(
+                                          '${order.discountPercent}% = ${discountAmount.toStringAsFixed(1)}',
+                                          style: const TextStyle(
+                                              color: Colors.redAccent),
+                                        )
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text('Service Charges'),
+                                        Text(order.serviceCharges.toString())
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Text(order.grandTotal.toString(),
+                                            style: const TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
                       ),
-              ],
-            ),
-          ),
-        ],
+                    ),
+            )
+          ],
+        ),
       ),
     );
   }
