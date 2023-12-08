@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xl;
 
@@ -18,12 +19,12 @@ import 'package:point_of_sale_app/general/drawer.dart';
 import 'package:point_of_sale_app/general/my_custom_appbar.dart';
 import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
 
-class LineData {
-  LineData(this.time, this.grandtotal, this.discount);
-  final String time;
-  final num grandtotal;
-  final num discount;
-}
+// class LineData {
+//   LineData(this.time, this.grandtotal, this.discount);
+//   final DateTime time;
+//   final num grandtotal;
+//   final num discount;
+// }
 
 class PieData {
   PieData(this.name, this.sold, this.qty);
@@ -53,6 +54,7 @@ class _DashboardState extends State<Dashboard> {
     'discountPercent',
     'serviceCharges'
   ];
+  String path = '';
 
   @override
   void initState() {
@@ -67,6 +69,7 @@ class _DashboardState extends State<Dashboard> {
       fromDate: fromDate.toString(),
       toDate: toDate.toString(),
     );
+    path = await getDatabasesPath();
     setState(() {
       _orders = result!;
     });
@@ -99,11 +102,11 @@ class _DashboardState extends State<Dashboard> {
       }
     }
 
-    List<MapEntry<String, Map<String, dynamic>>> sortedList =
-        groupedItems.entries.toList();
+//     List<MapEntry<String, Map<String, dynamic>>> sortedList =
+//         groupedItems.entries.toList();
 
-// Sort the list based on 'price'
-    sortedList.sort((a, b) => b.value['price'].compareTo(a.value['price']));
+// // Sort the list based on 'price'
+//     sortedList.sort((a, b) => b.value['price'].compareTo(a.value['price']));
 
     groupedItems.forEach((prodName, data) {
       // print(groupedItems.runtimeType);
@@ -111,13 +114,13 @@ class _DashboardState extends State<Dashboard> {
       groupedList.add(PieData(prodName, data['price'], data['quantity']));
     });
 
-    for (var entry in sortedList) {
-      String prodName = entry.key;
-      int totalPrice = entry.value['price'];
-      int totalQuantity = entry.value['quantity'];
-      // print('$prodName, $totalPrice, $totalQuantity');
-      groupedList.add(PieData(prodName, totalPrice, totalQuantity));
-    }
+//     for (var entry in sortedList) {
+//       String prodName = entry.key;
+//       int totalPrice = entry.value['price'];
+//       int totalQuantity = entry.value['quantity'];
+//       // print('$prodName, $totalPrice, $totalQuantity');
+//       groupedList.add(PieData(prodName, totalPrice, totalQuantity));
+//     }
     return groupedList;
   }
 
@@ -130,14 +133,14 @@ class _DashboardState extends State<Dashboard> {
     return str;
   }
 
-  List<LineData> buildData(List<OrderModel> orders) {
-    List<LineData> ordersList = [];
-    for (var order in _orders) {
-      ordersList.add(LineData(order.orderDate.toString(), order.grandTotal,
-          (order.total * (order.discountPercent / 100))));
-    }
-    return ordersList;
-  }
+  // List<LineData> buildData(List<OrderModel> orders) {
+  //   List<LineData> ordersList = [];
+  //   for (var order in _orders) {
+  //     ordersList.add(LineData(order.orderDate, order.grandTotal,
+  //         (order.total * (order.discountPercent / 100))));
+  //   }
+  //   return ordersList;
+  // }
 
   Future<void> exportAsExcel(
       List<OrderModel> orders, BuildContext context) async {
@@ -231,31 +234,40 @@ class _DashboardState extends State<Dashboard> {
                   width: 600,
                   child: SfCartesianChart(
                       primaryXAxis: CategoryAxis(),
+                      // primaryXAxis: DateTimeAxis(),
+                      primaryYAxis: NumericAxis(),
                       // title: ChartTitle(text: 'Grand Total'),
                       // legend: const Legend(isVisible: true),
                       tooltipBehavior: TooltipBehavior(
+                        color: Colors.purple[600],
+
                         enable: true,
-                        format: 'point.x || point.y',
-                        header: 'Grand Total',
-                        // builder: (data, point, series, pointIndex, seriesIndex) {
-                        //   return Container(
-                        //     padding: const EdgeInsets.all(5),
-                        //     child: Text('${point.x} : ${point.y}',
-                        //         style: const TextStyle(color: Colors.white)),
-                        //   );
-                        // },
+                        // format: 'point.x || point.y',
+                        // header: 'Grand Total',
+                        builder:
+                            (data, point, series, pointIndex, seriesIndex) {
+                          return Container(
+                            padding: const EdgeInsets.all(5),
+                            child: Text(
+                                '${DateFormat('d MMM yyyy h:mm a').format(point.x)}\n${point.y}',
+                                style: const TextStyle(
+                                    fontSize: 12, color: Colors.white)),
+                          );
+                        },
                       ),
-                      series: <LineSeries<LineData, String>>[
-                        LineSeries<LineData, String>(
-                            dataSource: buildData(_orders),
-                            xValueMapper: (LineData sales, _) => sales.time,
-                            yValueMapper: (LineData sales, _) =>
-                                sales.grandtotal),
-                        LineSeries<LineData, String>(
-                            dataSource: buildData(_orders),
-                            xValueMapper: (LineData sales, _) => sales.time,
-                            yValueMapper: (LineData sales, _) =>
-                                sales.discount),
+                      series: <LineSeries<OrderModel, DateTime>>[
+                        LineSeries<OrderModel, DateTime>(
+                            dataSource: _orders,
+                            xValueMapper: (OrderModel sales, _) =>
+                                sales.orderDate,
+                            yValueMapper: (OrderModel sales, _) =>
+                                sales.grandTotal),
+                        LineSeries<OrderModel, DateTime>(
+                            dataSource: _orders,
+                            xValueMapper: (OrderModel sales, _) =>
+                                sales.orderDate,
+                            yValueMapper: (OrderModel sales, _) =>
+                                (sales.total * (sales.discountPercent / 100))),
                       ]),
                 ),
                 SizedBox(
@@ -434,6 +446,10 @@ class _DashboardState extends State<Dashboard> {
                   ],
                 ),
               ),
+            ),
+            Text(
+              path,
+              maxLines: 2,
             ),
             Expanded(
               child: _orders.isEmpty
