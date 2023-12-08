@@ -59,8 +59,6 @@ class _DashboardState extends State<Dashboard> {
       fromDate: fromDate.toString(),
       toDate: toDate.toString(),
     );
-    groupByProducts(result!);
-
     setState(() {
       _orders = result!;
     });
@@ -216,7 +214,7 @@ class _DashboardState extends State<Dashboard> {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text('Sort By\t'),
                 SizedBox(
@@ -351,33 +349,138 @@ class _DashboardState extends State<Dashboard> {
                 ? const Center(
                     child: Text('No orders available.'),
                   )
-                : ListView.builder(
-                    itemCount: _orders.length,
-                    itemBuilder: (context, index) {
-                      OrderModel order = _orders[index];
-                      return Card(
-                        elevation: 3,
-                        margin: const EdgeInsets.all(8),
-                        child: ListTile(
-                          title: Text('Order ID: ${order.orderId}'),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Order Date: ${order.orderDate}'),
-                              Text(
-                                  'Grand Total: \$${order.grandTotal.toStringAsFixed(2)}'),
-                              Text(
-                                  'Total: \$${order.total.toStringAsFixed(2)}'),
-                              Text(
-                                  'Service Charges: \$${order.serviceCharges}'),
-                              Text('GST Percent: ${order.gstPercent}%'),
-                              Text(
-                                  'Discount Percent: ${order.discountPercent}%'),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                : Center(
+                    child: SizedBox(
+                      width: 500,
+                      child: ListView.builder(
+                        itemCount: _orders.length,
+                        itemBuilder: (context, index) {
+                          final order = _orders[index];
+                          List<Map<String, dynamic>> orderItemsList =
+                              List<Map<String, dynamic>>.from(
+                                  jsonDecode(order.orderItemsList));
+
+                          double gstAmount =
+                              order.total * (order.gstPercent / 100);
+                          double discountAmount =
+                              order.total * (order.discountPercent / 100);
+
+                          return Card(
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: ExpansionTile(
+                              shape: const Border(),
+                              title: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('${order.orderId}',
+                                      style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold)),
+                                  Text(
+                                    textAlign: TextAlign.start,
+                                    DateFormat('dd-MMM-yy h:mm a')
+                                        .format(order.orderDate),
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                  Text(
+                                      textAlign: TextAlign.end,
+                                      order.grandTotal.toString(),
+                                      style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                              children: [
+                                for (var item in orderItemsList)
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(15, 0, 25, 0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        SizedBox(
+                                          width: 140,
+                                          child: Text(
+                                            '${item['prodName']}',
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${item['price']} x ${item['quantity']} = ${item['price'] * item['quantity']}',
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(15, 0, 25, 10),
+                                  child: Column(
+                                    children: [
+                                      const Divider(
+                                          color:
+                                              Color.fromARGB(255, 67, 2, 80)),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Text('Total'),
+                                          Text(order.total.toStringAsFixed(1))
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Text('GST'),
+                                          Text(
+                                              '${order.gstPercent}% = ${gstAmount.toStringAsFixed(1)}')
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Text('Discount '),
+                                          Text(
+                                            '${order.discountPercent}% = ${discountAmount.toStringAsFixed(1)}',
+                                            style: const TextStyle(
+                                                color: Colors.redAccent),
+                                          )
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Text('Service Charges'),
+                                          Text(order.serviceCharges.toString())
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Text(order.grandTotal.toString(),
+                                              style: const TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold)),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
           ),
         ],
