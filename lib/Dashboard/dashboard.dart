@@ -447,10 +447,6 @@ class _DashboardState extends State<Dashboard> {
                 ),
               ),
             ),
-            Text(
-              path,
-              maxLines: 2,
-            ),
             Expanded(
               child: _orders.isEmpty
                   ? const Center(
