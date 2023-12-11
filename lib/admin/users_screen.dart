@@ -38,6 +38,7 @@ class _UsersScreenState extends State<UsersScreen> {
                   MaterialPageRoute(builder: (context) => AddUser()),
                 );
               },
+              backgroundColor: Colors.purple.shade600,
               label: const Text("Add"),
               icon: const Icon(Icons.add),
             ),

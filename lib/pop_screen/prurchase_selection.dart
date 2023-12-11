@@ -55,6 +55,8 @@ class _PurchaseSelectionState extends State<PurchaseSelection> {
     return Column(
       children: [
         DataTable(
+          headingRowColor:
+              MaterialStateColor.resolveWith((states) => Colors.green.shade700),
           columnSpacing: 30.0,
           columns: const [
             DataColumn(label: Text('Name')),
@@ -177,6 +179,7 @@ class _PurchaseSelectionState extends State<PurchaseSelection> {
               );
             }
           },
+          backgroundColor: Colors.green.shade600,
           label: const Text('Add to Purchase'),
         )
       ],

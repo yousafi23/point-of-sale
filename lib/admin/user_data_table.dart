@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/admin/add_user_form.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
@@ -5,7 +7,7 @@ import 'package:point_of_sale_app/database/user_model.dart';
 import 'package:point_of_sale_app/general/confirmation_alert.dart';
 
 class UserDataTable extends StatefulWidget {
-  const UserDataTable({Key? key}) : super(key: key);
+  const UserDataTable({super.key});
 
   @override
   _UserDataTableState createState() => _UserDataTableState();
@@ -13,6 +15,7 @@ class UserDataTable extends StatefulWidget {
 
 class _UserDataTableState extends State<UserDataTable> {
   List<Map<String, dynamic>> usersTableData = [];
+  int counter = 1;
 
   @override
   void initState() {
@@ -34,23 +37,30 @@ class _UserDataTableState extends State<UserDataTable> {
     return Column(
       children: [
         DataTable(
+          headingRowColor: MaterialStateColor.resolveWith(
+              (states) => Colors.purple.shade400),
           columns: const [
             DataColumn(label: Text('ID')),
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('UserName')),
-            DataColumn(label: Text('Password')),
             DataColumn(label: Text('Is Admin')),
             DataColumn(label: Text('')),
             DataColumn(label: Text('')),
           ],
           rows: usersTableData.map<DataRow>((Map<String, dynamic> row) {
+            UserModel userModel = UserModel.fromMap(row);
+            counter++;
+
             return DataRow(
+              color: counter.isEven
+                  ? MaterialStateProperty.resolveWith((states) => Colors.white)
+                  : MaterialStateProperty.resolveWith(
+                      (states) => Colors.purple[100]),
               cells: [
-                DataCell(Text(row['userId'].toString())),
-                DataCell(Text(row['name'])),
-                DataCell(Text(row['userName'])),
-                DataCell(Text(row['password'])),
-                DataCell(Text("${row['isAdmin']}")),
+                DataCell(Text(userModel.userId.toString())),
+                DataCell(Text(userModel.name)),
+                DataCell(Text(userModel.userName)),
+                DataCell(Text(userModel.isAdmin.toString())),
                 DataCell(
                   GestureDetector(
                     child: const Icon(Icons.edit),

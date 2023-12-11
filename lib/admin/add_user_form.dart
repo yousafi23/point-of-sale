@@ -1,8 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/admin/users_screen.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/database/user_model.dart';
 import 'package:point_of_sale_app/general/my_custom_appbar.dart';
+import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
 
 // ignore: must_be_immutable
 class AddUser extends StatefulWidget {
@@ -85,13 +88,34 @@ class _AddUserState extends State<AddUser> {
                 if (widget.isUpdate == true) {
                   await DatabaseHelper.instance.updateRecord(
                       'Users', userModel.toMap(), 'userId=?', widget.userId!);
-                } else {
-                  await DatabaseHelper.instance
-                      .insertRecord('Users', userModel.toMap());
-                }
 
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const UsersScreen()));
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const UsersScreen()));
+
+                  myCustomSnackBar(
+                      message: 'User Updated',
+                      warning: false,
+                      context: context);
+                } else {
+                  if (userNameCont.text.trim() != '' &&
+                      passCont.text.trim() != '') {
+                    await DatabaseHelper.instance
+                        .insertRecord('Users', userModel.toMap());
+
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const UsersScreen()));
+
+                    myCustomSnackBar(
+                        message: 'User Added',
+                        warning: false,
+                        context: context);
+                  } else {
+                    myCustomSnackBar(
+                        message: 'Fill all the fields',
+                        warning: true,
+                        context: context);
+                  }
+                }
               },
               label: const Text('Submit'),
             ),

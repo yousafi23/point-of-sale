@@ -17,10 +17,10 @@ class ReusableDrawer extends StatelessWidget {
   final Widget currentPage;
 
   const ReusableDrawer({
-    Key? key,
+    super.key,
     required this.title,
     required this.currentPage,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

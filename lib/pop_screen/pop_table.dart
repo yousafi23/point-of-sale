@@ -17,6 +17,7 @@ class PopTableWidget extends StatefulWidget {
 
 class _PopTableWidgetState extends State<PopTableWidget> {
   List<Map<String, dynamic>> productsData = [];
+  int counter = 1;
 
   @override
   void initState() {
@@ -37,6 +38,8 @@ class _PopTableWidgetState extends State<PopTableWidget> {
     return Column(
       children: [
         DataTable(
+          headingRowColor:
+              MaterialStateColor.resolveWith((states) => Colors.green.shade700),
           columnSpacing: 15.0,
           columns: const [
             DataColumn(label: Text('ID')),
@@ -48,8 +51,13 @@ class _PopTableWidgetState extends State<PopTableWidget> {
           ],
           rows: productsData.map<DataRow>((Map<String, dynamic> row) {
             IngredientModel ingredientModel = IngredientModel.fromMap(row);
+            counter++;
 
             return DataRow(
+              color: counter.isEven
+                  ? MaterialStateProperty.resolveWith((states) => Colors.white)
+                  : MaterialStateProperty.resolveWith(
+                      (states) => Colors.green[100]),
               cells: [
                 DataCell(Text(ingredientModel.ingredientId.toString())),
                 DataCell(SizedBox(

@@ -23,6 +23,12 @@ class Home extends StatelessWidget {
     return MaterialApp(
       title: 'Yousaf',
       theme: ThemeData(
+          primaryColor: Colors.white,
+          elevatedButtonTheme: const ElevatedButtonThemeData(
+              style: ButtonStyle(
+                  foregroundColor: MaterialStatePropertyAll(Colors.white))),
+          floatingActionButtonTheme: const FloatingActionButtonThemeData(
+              backgroundColor: Colors.purple, foregroundColor: Colors.white),
           useMaterial3: true,
           textTheme:
               const TextTheme(headlineLarge: TextStyle(color: Colors.white))),

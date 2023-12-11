@@ -438,6 +438,9 @@ class _DashboardState extends State<Dashboard> {
                       child: ElevatedButton.icon(
                           onPressed: () => exportAsExcel(_orders, context),
                           icon: const Icon(Icons.download),
+                          style: ButtonStyle(
+                              foregroundColor: MaterialStateColor.resolveWith(
+                                  (states) => Colors.purple.shade700)),
                           label: const Text('Export as Excel')),
                     ),
                   ],

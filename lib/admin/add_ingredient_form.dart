@@ -92,18 +92,29 @@ class _AddIngredientState extends State<AddIngredient> {
                         message: 'Ingredient Updated: ${ingredientModel.name}',
                         warning: false,
                         context: context);
+
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const IngredientsScreen()));
                   } else {
-                    await DatabaseHelper.instance
-                        .insertRecord('Ingredients', ingredientModel.toMap());
+                    if (nameCont.text != '' &&
+                        unitCostCont.value.toString() != '') {
+                      await DatabaseHelper.instance
+                          .insertRecord('Ingredients', ingredientModel.toMap());
 
-                    myCustomSnackBar(
-                        message: 'Ingredient Added: ${ingredientModel.name}',
-                        warning: false,
-                        context: context);
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const IngredientsScreen()));
+
+                      myCustomSnackBar(
+                          message: 'Ingredient Added: ${ingredientModel.name}',
+                          warning: false,
+                          context: context);
+                    } else {
+                      myCustomSnackBar(
+                          message: 'Fill all the Fields',
+                          warning: true,
+                          context: context);
+                    }
                   }
-
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const IngredientsScreen()));
                 },
                 label: const Text('Submit'),
               ),

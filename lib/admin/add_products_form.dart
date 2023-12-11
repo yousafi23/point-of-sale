@@ -237,11 +237,14 @@ class _AddProductState extends State<AddProduct> {
             const SizedBox(height: 45),
             FloatingActionButton.extended(
               onPressed: () async {
-                if (isEmpty != true) {
+                if (nameCont.text.trim() != '' &&
+                    unitcostCont.value.toString() != '' &&
+                    unitpriceCont.value.toString() != '' &&
+                    isEmpty != true) {
                   addProduct();
                 } else {
                   myCustomSnackBar(
-                      message: 'Fields are empty',
+                      message: 'Fill all the Fields',
                       warning: true,
                       context: context);
                 }

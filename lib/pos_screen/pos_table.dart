@@ -222,6 +222,8 @@ class SizeWidget extends StatelessWidget {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green.shade300,
+              shape: ContinuousRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
               minimumSize: Size.zero,
               padding: const EdgeInsets.all(5),
               textStyle: const TextStyle(fontSize: 11),
