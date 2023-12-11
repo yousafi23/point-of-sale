@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xl;
 
@@ -54,7 +53,6 @@ class _DashboardState extends State<Dashboard> {
     'discountPercent',
     'serviceCharges'
   ];
-  String path = '';
 
   @override
   void initState() {
@@ -69,8 +67,6 @@ class _DashboardState extends State<Dashboard> {
       fromDate: fromDate.toString(),
       toDate: toDate.toString(),
     );
-    path = await getDatabasesPath();
-    print(path);
     setState(() {
       _orders = result!;
     });
