@@ -21,7 +21,7 @@ class DatabaseHelper {
   }
 
   initDB() async {
-    Directory directory = await getApplicationCacheDirectory();
+    Directory directory = Directory.current;
     String path = join(directory.path, dbName);
     return await openDatabase(path, version: dbVersion, onCreate: onCreate);
   }
@@ -234,10 +234,21 @@ class DatabaseHelper {
     );
   }
 
-  Future<List<OrderModel>?> getlatest12Orders() async {
+  Future<List<OrderModel>?> getOrders({
+    String? orderBy,
+    int? limit,
+    String? where,
+    String? fromDate,
+    String? toDate,
+  }) async {
     final db = await database;
-    final result =
-        await db?.query('Orders', orderBy: 'orderDate DESC', limit: 12);
+    final result = await db?.query(
+      'Orders',
+      orderBy: orderBy,
+      limit: limit,
+      where: where,
+      whereArgs: fromDate == null && toDate == null ? null : [fromDate, toDate],
+    );
     return result?.map((jsonOrder) {
       return OrderModel.fromJson(jsonOrder);
     }).toList();

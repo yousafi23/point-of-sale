@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:point_of_sale_app/Dashboard/dashboard.dart';
 import 'package:point_of_sale_app/admin/ingredients_screen.dart';
 import 'package:point_of_sale_app/admin/products_screen.dart';
 import 'package:point_of_sale_app/admin/users_screen.dart';
@@ -58,6 +59,10 @@ class ReusableDrawer extends StatelessWidget {
             },
           ),
           createDrawerItem(
+            title: 'Dashboard',
+            page: const Dashboard(),
+          ),
+          createDrawerItem(
             title: 'Products',
             page: const ProductsScreen(),
           ),
@@ -83,7 +88,7 @@ class ReusableDrawer extends StatelessWidget {
           ),
           createDrawerItem(
             title: 'Company Settings',
-            page: CompanySettingsScreen(),
+            page: const CompanySettingsScreen(),
           ),
           createDrawerItem(
             title: 'POS',

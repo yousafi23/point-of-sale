@@ -8,7 +8,7 @@ class OrderItemModel {
   final int quantity;
   final int? itemDiscount;
   final int? orderItemId;
-  
+
   OrderItemModel({
     required this.productId,
     required this.prodName,
