@@ -21,7 +21,9 @@ class DatabaseHelper {
   }
 
   initDB() async {
-    Directory directory = Directory.current;
+    Directory directory = await getApplicationCacheDirectory();
+    //SWITCH BEFORE BUILDING.
+    // Directory directory = Directory.current;
     String path = join(directory.path, dbName);
     return await openDatabase(path, version: dbVersion, onCreate: onCreate);
   }

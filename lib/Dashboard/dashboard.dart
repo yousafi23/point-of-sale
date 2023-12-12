@@ -99,25 +99,11 @@ class _DashboardState extends State<Dashboard> {
       }
     }
 
-//     List<MapEntry<String, Map<String, dynamic>>> sortedList =
-//         groupedItems.entries.toList();
-
-// // Sort the list based on 'price'
-//     sortedList.sort((a, b) => b.value['price'].compareTo(a.value['price']));
-
     groupedItems.forEach((prodName, data) {
       // print(groupedItems.runtimeType);
       // print('$prodName, ${data['price']}, ${data['quantity']}');
       groupedList.add(PieData(prodName, data['price'], data['quantity']));
     });
-
-//     for (var entry in sortedList) {
-//       String prodName = entry.key;
-//       int totalPrice = entry.value['price'];
-//       int totalQuantity = entry.value['quantity'];
-//       // print('$prodName, $totalPrice, $totalQuantity');
-//       groupedList.add(PieData(prodName, totalPrice, totalQuantity));
-//     }
     return groupedList;
   }
 
@@ -138,6 +124,16 @@ class _DashboardState extends State<Dashboard> {
   //   }
   //   return ordersList;
   // }
+
+  String calculateTotal(OrderItemModel item) {
+    if (item.itemDiscount != 0) {
+      var discountprice = item.price * (item.itemDiscount! / 100);
+      var finalPrice = item.quantity * discountprice;
+      return '${item.price} x ${item.quantity} - ${item.itemDiscount}% = ${finalPrice.toStringAsFixed(1)}';
+    } else {
+      return '${item.price} x ${item.quantity} = ${item.price * item.quantity}';
+    }
+  }
 
   Future<void> exportAsExcel(
       List<OrderModel> orders, BuildContext context) async {
@@ -453,11 +449,12 @@ class _DashboardState extends State<Dashboard> {
                       child: Text('No orders available.'),
                     )
                   : Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(15.0),
                       child: GridView.builder(
                         gridDelegate:
                             const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 300.0, // maximum width
+                          maxCrossAxisExtent: 410.0, // maximum width
+                          childAspectRatio: 1.5,
                           mainAxisSpacing: 10.0,
                           crossAxisSpacing: 10.0,
                         ),
@@ -500,15 +497,18 @@ class _DashboardState extends State<Dashboard> {
                                     ),
                                     const SizedBox(height: 10),
                                     Column(
-                                      children: orderItemsList.map((item) {
+                                      children: orderItemsList.map((temp) {
+                                        OrderItemModel item =
+                                            OrderItemModel.fromMap(temp);
+                                        String str = calculateTotal(item);
+
                                         return Tooltip(
                                           decoration: BoxDecoration(
-                                              color: Colors.purple[600],
+                                              color: Colors.purple[700],
                                               borderRadius:
                                                   const BorderRadius.all(
                                                       Radius.circular(5))),
-                                          message:
-                                              '${item['prodName']}\n${item['price']} x ${item['quantity']} = ${item['price'] * item['quantity']}',
+                                          message: '${item.prodName}\n$str',
                                           child: Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,
@@ -516,21 +516,32 @@ class _DashboardState extends State<Dashboard> {
                                               SizedBox(
                                                 width: 140,
                                                 child: Text(
-                                                  '${item['prodName']}',
+                                                  item.prodName,
                                                   overflow:
                                                       TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                      color:
+                                                          item.itemDiscount != 0
+                                                              ? Colors.red
+                                                              : null),
                                                 ),
                                               ),
                                               Text(
-                                                '${item['price']} x ${item['quantity']} = ${item['price'] * item['quantity']}',
+                                                str,
                                                 overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    color:
+                                                        item.itemDiscount != 0
+                                                            ? Colors.red
+                                                            : null),
                                               ),
                                             ],
                                           ),
                                         );
                                       }).toList(),
                                     ),
-                                    Divider(color: Colors.purple[800]),
+                                    const Divider(
+                                        color: Color.fromARGB(255, 1, 77, 4)),
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
@@ -555,8 +566,10 @@ class _DashboardState extends State<Dashboard> {
                                         const Text('Discount '),
                                         Text(
                                           '${order.discountPercent}% = ${discountAmount.toStringAsFixed(1)}',
-                                          style: const TextStyle(
-                                              color: Colors.redAccent),
+                                          style: TextStyle(
+                                              color: order.discountPercent != 0
+                                                  ? Colors.red
+                                                  : null),
                                         )
                                       ],
                                     ),

@@ -4,12 +4,13 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
+import 'package:point_of_sale_app/database/order_item_model.dart';
 import 'package:point_of_sale_app/database/order_model.dart';
 import 'package:point_of_sale_app/general/drawer.dart';
 import 'package:point_of_sale_app/general/my_custom_appbar.dart';
 
 class OrderViewScreen extends StatefulWidget {
-  const OrderViewScreen({Key? key}) : super(key: key);
+  const OrderViewScreen({super.key});
 
   @override
   _OrderViewScreenState createState() => _OrderViewScreenState();
@@ -33,6 +34,16 @@ class _OrderViewScreenState extends State<OrderViewScreen> {
     });
   }
 
+  String calculateTotal(OrderItemModel item) {
+    if (item.itemDiscount != 0) {
+      var discountprice = item.price * (item.itemDiscount! / 100);
+      var finalPrice = item.quantity * discountprice;
+      return '${item.price} x ${item.quantity} - ${item.itemDiscount}% = ${finalPrice.toStringAsFixed(1)}';
+    } else {
+      return '${item.price} x ${item.quantity} = ${item.price * item.quantity}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,7 +63,8 @@ class _OrderViewScreenState extends State<OrderViewScreen> {
               padding: const EdgeInsets.all(15.0),
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 370.0, // maximum width
+                  maxCrossAxisExtent: 410.0, // maximum width
+                  childAspectRatio: 1.5,
                   mainAxisSpacing: 10.0,
                   crossAxisSpacing: 10.0,
                 ),
@@ -93,28 +105,39 @@ class _OrderViewScreenState extends State<OrderViewScreen> {
                             ),
                             const SizedBox(height: 10),
                             Column(
-                              children: orderItemsList.map((item) {
+                              children: orderItemsList.map((temp) {
+                                OrderItemModel item =
+                                    OrderItemModel.fromMap(temp);
+                                String str = calculateTotal(item);
+
                                 return Tooltip(
                                   decoration: BoxDecoration(
                                       color: Colors.green[700],
                                       borderRadius: const BorderRadius.all(
                                           Radius.circular(5))),
-                                  message:
-                                      '${item['prodName']}\n${item['price']} x ${item['quantity']} = ${item['price'] * item['quantity']}',
+                                  message: '${item.prodName}\n$str',
                                   child: Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       SizedBox(
-                                        width: 140,
+                                        width: 150,
                                         child: Text(
-                                          '${item['prodName']}',
+                                          item.prodName,
                                           overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              color: item.itemDiscount != 0
+                                                  ? Colors.red
+                                                  : null),
                                         ),
                                       ),
                                       Text(
-                                        '${item['price']} x ${item['quantity']} = ${item['price'] * item['quantity']}',
+                                        str,
                                         overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                            color: item.itemDiscount != 0
+                                                ? Colors.red
+                                                : null),
                                       ),
                                     ],
                                   ),
@@ -143,8 +166,10 @@ class _OrderViewScreenState extends State<OrderViewScreen> {
                                 const Text('Discount '),
                                 Text(
                                   '${order.discountPercent}% = ${discountAmount.toStringAsFixed(1)}',
-                                  style:
-                                      const TextStyle(color: Colors.redAccent),
+                                  style: TextStyle(
+                                      color: order.discountPercent != 0
+                                          ? Colors.red
+                                          : null),
                                 )
                               ],
                             ),
