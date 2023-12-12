@@ -46,6 +46,7 @@ class DatabaseHelper {
       orderItemId INTEGER PRIMARY KEY AUTOINCREMENT,
       prodName TEXT NOT NULL,
       price INT NOT NULL,
+      cost INT NOT NULL,
       quantity INT NOT NULL,
       itemDiscount INT,
       productId INTEGER,

@@ -246,6 +246,7 @@ Future<void Function()?> productSelected(BuildContext context,
     prodName: productModel.prodName,
     price: productModel.unitPrice!,
     itemDiscount: 0, //just temporarily added, cahnge with value from field.
+    cost: productModel.unitCost!,
     quantity: 1,
   );
 

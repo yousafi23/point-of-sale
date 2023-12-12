@@ -26,10 +26,10 @@ import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
 // }
 
 class PieData {
-  PieData(this.name, this.sold, this.qty);
+  PieData(this.name, this.totalSold, this.totalQty);
   final String name;
-  final num sold;
-  final num qty;
+  final num totalSold;
+  final num totalQty;
 }
 
 class Dashboard extends StatefulWidget {
@@ -42,7 +42,6 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   List<OrderModel> _orders = [];
   String orderByField = 'orderDate';
-  bool isHovered = false;
   String sortByFeild = 'DESC';
   DateTime toDate = DateTime.now();
   DateTime fromDate = Jiffy.now().subtract(days: 30).dateTime;
@@ -180,15 +179,17 @@ class _DashboardState extends State<Dashboard> {
     if (downloadsDir != null) {
       try {
         String path = downloadsDir.path;
-        final String fileName =
-            '$path/${DateFormat('d_MMM_yyyy').format(fromDate)} To ${DateFormat('d_MMM_yyyy').format(toDate)}.xlsx';
+        final String fileName = '''Order History 
+                      $path/${DateFormat('d_MMM_yyyy').format(fromDate)} To
+                      ${DateFormat('d_MMM_yyyy').format(toDate)} .xlsx
+                      ''';
         final File file = File(fileName);
         await file.writeAsBytes(bytes, flush: true);
         myCustomSnackBar(
             context: context,
             message: 'Saved to:  $fileName',
             warning: false,
-            duration: 6);
+            duration: 10);
         OpenFile.open(fileName);
       } on Exception catch (e) {
         myCustomSnackBar(
@@ -224,15 +225,20 @@ class _DashboardState extends State<Dashboard> {
             Row(
               children: [
                 SizedBox(
-                  width: 600,
+                  width: 700,
                   child: SfCartesianChart(
-                      primaryXAxis: CategoryAxis(),
-                      // primaryXAxis: DateTimeAxis(),
+                      primaryXAxis: DateTimeAxis(
+                        dateFormat: DateFormat('d MMM HH:mm'),
+                      ),
                       primaryYAxis: NumericAxis(),
                       // title: ChartTitle(text: 'Grand Total'),
-                      // legend: const Legend(isVisible: true),
+                      legend: const Legend(
+                          isVisible: true,
+                          position: LegendPosition.top,
+                          offset: Offset(1, 1)),
                       tooltipBehavior: TooltipBehavior(
                         color: Colors.purple[600],
+                        duration: 5,
 
                         enable: true,
                         // format: 'point.x || point.y',
@@ -250,12 +256,24 @@ class _DashboardState extends State<Dashboard> {
                       ),
                       series: <LineSeries<OrderModel, DateTime>>[
                         LineSeries<OrderModel, DateTime>(
+                            name: 'Grand Total',
+                            sortingOrder: SortingOrder.ascending,
+                            sortFieldValueMapper: (OrderModel sales, _) =>
+                                sales.orderDate,
+                            markerSettings: const MarkerSettings(
+                                isVisible: true, height: 4, width: 4),
                             dataSource: _orders,
                             xValueMapper: (OrderModel sales, _) =>
                                 sales.orderDate,
                             yValueMapper: (OrderModel sales, _) =>
                                 sales.grandTotal),
                         LineSeries<OrderModel, DateTime>(
+                            name: 'Discount value',
+                            sortingOrder: SortingOrder.ascending,
+                            sortFieldValueMapper: (OrderModel sales, _) =>
+                                sales.orderDate,
+                            markerSettings: const MarkerSettings(
+                                isVisible: true, height: 4, width: 4),
                             dataSource: _orders,
                             xValueMapper: (OrderModel sales, _) =>
                                 sales.orderDate,
@@ -264,28 +282,31 @@ class _DashboardState extends State<Dashboard> {
                       ]),
                 ),
                 SizedBox(
-                  width: 600,
+                  width: 500,
                   child: SfCircularChart(
+                    title: ChartTitle(
+                      text: 'Products Sold By Quantity',
+                      alignment: ChartAlignment.center,
+                    ),
                     series: <CircularSeries>[
                       PieSeries<PieData, String>(
                         dataSource: groupByProducts(_orders),
                         // pointColorMapper: (PieData data, _) => data.qty,
                         xValueMapper: (PieData data, _) => data.name,
-                        yValueMapper: (PieData data, _) => data.sold,
+                        yValueMapper: (PieData data, _) => data.totalQty,
                         dataLabelMapper: (PieData data, _) => data.name,
                         dataLabelSettings: const DataLabelSettings(
                           isVisible: true,
                           labelPosition: ChartDataLabelPosition.outside,
                           textStyle: TextStyle(),
                           connectorLineSettings:
-                              ConnectorLineSettings(type: ConnectorType.curve),
-                          // overflowMode: OverflowMode.none
+                              ConnectorLineSettings(type: ConnectorType.line),
                           // useSeriesColor: true,
+                          // labelIntersectAction: LabelIntersectAction.shift,
                         ),
                         explode: true,
-                        // explodeAll: true,
                         explodeGesture: ActivationMode.singleTap,
-                        groupMode: CircularChartGroupMode.point,
+                        // groupMode: CircularChartGroupMode.point,
                         // As the grouping mode is point, 2 points will be grouped
                         // groupTo: 5,
                         enableTooltip: true,
