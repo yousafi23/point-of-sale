@@ -6,7 +6,7 @@ class OrderItemModel {
   final String prodName;
   final int price;
   final int quantity;
-  final int? itemDiscount;
+  int? itemDiscount;
   final int? orderItemId;
 
   OrderItemModel({

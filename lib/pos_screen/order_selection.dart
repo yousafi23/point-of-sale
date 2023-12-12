@@ -27,17 +27,15 @@ class _OrderSelectionState extends State<OrderSelection> {
   double total = 0.0;
   double gstAmount = 0.0;
   double discountAmount = 0.0;
-  int orderItemId = 0;
   int serviceCharges = 0;
   int gst = 0;
   int discount = 0;
 
-  int prodDiscount = 0;
+  int itemDiscount = 0;
 
-  final prodDiscountCont = TextEditingController();
   final discountCont = TextEditingController();
   final serviceChargesCont = TextEditingController();
-
+  // List<TextEditingController>
   @override
   void initState() {
     super.initState();
@@ -60,12 +58,24 @@ class _OrderSelectionState extends State<OrderSelection> {
     serviceChargesCont.text = serviceCharges.toString();
   }
 
+  num calculateItemTotal(int qty, int price, {int? discount}) {
+    if (discount != null) {
+      // print('discounted');
+      var discountprice = price * (discount / 100);
+      return qty * (price - discountprice);
+    } else {
+      // print('simple');
+      return qty * price;
+    }
+  }
+
   void calculateGrandTotal() {
     grandTotal = 0.0;
     total = 0.0;
 
     for (var item in widget.orderItems) {
-      int itemTotal = item['quantity'] * item['price'];
+      num itemTotal = calculateItemTotal(item['quantity'], item['price'],
+          discount: item['itemDiscount']);
       total += itemTotal;
     }
 
@@ -94,7 +104,7 @@ class _OrderSelectionState extends State<OrderSelection> {
               DataColumn(label: Text('Unit Price')),
               DataColumn(label: Text('Qty')),
               DataColumn(label: Text('Total')),
-              DataColumn(label: Text('Discount')),
+              DataColumn(label: Text('Discount %')),
               DataColumn(label: Text('')),
               DataColumn(label: Text('')),
             ],
@@ -110,20 +120,41 @@ class _OrderSelectionState extends State<OrderSelection> {
                       ))),
                   DataCell(Text(orderItemModel.price.toString())),
                   DataCell(Text(orderItemModel.quantity.toString())),
-                  DataCell(Text((orderItemModel.quantity * orderItemModel.price)
-                      .toString())),
+                  DataCell(Text((calculateItemTotal(
+                          orderItemModel.quantity, orderItemModel.price,
+                          discount: orderItemModel.itemDiscount))
+                      .toStringAsFixed(1))),
                   DataCell(
                     SizedBox(
-                      width: 30,
+                      width: 35,
                       height: 25,
                       child: TextField(
                         inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
+                          FilteringTextInputFormatter.digitsOnly,
                         ],
-                        controller: prodDiscountCont,
-                        onChanged: (value) {
-                          prodDiscount = int.tryParse(value) ?? 0;
-                          calculateGrandTotal();
+                        decoration: const InputDecoration(counterText: ""),
+                        maxLength: 3,
+                        onChanged: (value) async {
+                          itemDiscount = int.tryParse(value) ?? 0;
+
+                          if (itemDiscount <= 100) {
+                            OrderItemModel newOrderItemModel = orderItemModel
+                                .copyWith(itemDiscount: itemDiscount);
+
+                            await DatabaseHelper.instance.updateRecord(
+                                'OrderItems',
+                                newOrderItemModel.toMap(),
+                                'orderItemId=?',
+                                orderItemModel.orderItemId!);
+
+                            calculateGrandTotal();
+                            await _loadData();
+                          } else {
+                            myCustomSnackBar(
+                                context: context,
+                                message: 'Discount can NOT be greater than 100',
+                                warning: true);
+                          }
                         },
                       ),
                     ),
@@ -196,7 +227,7 @@ class _OrderSelectionState extends State<OrderSelection> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Total'),
-                          Text('Rs ${total.toString()}'),
+                          Text('Rs ${total.toStringAsFixed(1)}'),
                         ],
                       ),
                       Row(
@@ -208,7 +239,7 @@ class _OrderSelectionState extends State<OrderSelection> {
                             children: [
                               const Text('Rs '),
                               SizedBox(
-                                width: 30,
+                                width: 45,
                                 height: 25,
                                 child: TextField(
                                   inputFormatters: [
@@ -240,12 +271,15 @@ class _OrderSelectionState extends State<OrderSelection> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               SizedBox(
-                                width: 30,
+                                width: 35,
                                 height: 25,
                                 child: TextField(
                                   inputFormatters: [
                                     FilteringTextInputFormatter.digitsOnly
                                   ],
+                                  decoration:
+                                      const InputDecoration(counterText: ""),
+                                  maxLength: 3,
                                   controller: discountCont,
                                   onChanged: (value) {
                                     int disVal = int.tryParse(value) ?? 0;
@@ -297,8 +331,6 @@ class _OrderSelectionState extends State<OrderSelection> {
                     gstPercent: gst,
                     discountPercent: discount);
 
-                // print('Model=${orderModel.toMap()}');
-                // print('str=${widget.orderItems}');
                 final bool confirmed =
                     await showPlaceOrderConfirmation(context);
                 if (confirmed) {
