@@ -43,7 +43,7 @@ class _DashboardState extends State<Dashboard> {
   List<OrderModel> _orders = [];
   String orderByField = 'orderDate';
   bool isHovered = false;
-  String sortByFeild = 'ASC';
+  String sortByFeild = 'DESC';
   DateTime toDate = DateTime.now();
   DateTime fromDate = Jiffy.now().subtract(days: 30).dateTime;
   List<String> dropDownItemsList = [
@@ -161,8 +161,8 @@ class _DashboardState extends State<Dashboard> {
     }
 
     // Add data rows
-    for (int rowIndex = 0; rowIndex < _orders.length; rowIndex++) {
-      OrderModel order = _orders[rowIndex];
+    for (int rowIndex = 0; rowIndex < orders.length; rowIndex++) {
+      OrderModel order = orders[rowIndex];
       Map<String, dynamic> orderMap = order.toMap();
       for (int colIndex = 0; colIndex < headings.length; colIndex++) {
         sheet.getRangeByIndex(rowIndex + 2, colIndex + 1).setText(
