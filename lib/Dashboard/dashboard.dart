@@ -18,12 +18,28 @@ import 'package:point_of_sale_app/general/drawer.dart';
 import 'package:point_of_sale_app/general/my_custom_appbar.dart';
 import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
 
-// class LineData {
-//   LineData(this.time, this.grandtotal, this.discount);
-//   final DateTime time;
-//   final num grandtotal;
-//   final num discount;
-// }
+class NewOrdersWithProfit {
+  NewOrdersWithProfit({
+    required this.orderId,
+    required this.orderDate,
+    required this.grandTotal,
+    required this.discountPercent,
+    required this.profit,
+    required this.orderItemsList,
+    required this.gstPercent,
+    required this.serviceCharges,
+    required this.total,
+  });
+  final int orderId;
+  final DateTime orderDate;
+  final List<OrderItemModel> orderItemsList;
+  final int discountPercent;
+  final int gstPercent;
+  final int serviceCharges;
+  final num total;
+  final num grandTotal;
+  final num profit;
+}
 
 class PieData {
   PieData(this.name, this.totalSold, this.totalQty);
@@ -45,6 +61,7 @@ class _DashboardState extends State<Dashboard> {
   String sortByFeild = 'DESC';
   DateTime toDate = DateTime.now();
   DateTime fromDate = Jiffy.now().subtract(days: 30).dateTime;
+  List<NewOrdersWithProfit> ordersWithProfit = [];
   List<String> dropDownItemsList = [
     'orderDate',
     'grandTotal',
@@ -66,8 +83,10 @@ class _DashboardState extends State<Dashboard> {
       fromDate: fromDate.toString(),
       toDate: toDate.toString(),
     );
+    // final result2 = buildData(_orders);
     setState(() {
       _orders = result!;
+      ordersWithProfit = buildData(_orders);
     });
   }
 
@@ -115,38 +134,71 @@ class _DashboardState extends State<Dashboard> {
     return str;
   }
 
-  // List<LineData> buildData(List<OrderModel> orders) {
-  //   List<LineData> ordersList = [];
-  //   for (var order in _orders) {
-  //     ordersList.add(LineData(order.orderDate, order.grandTotal,
-  //         (order.total * (order.discountPercent / 100))));
-  //   }
-  //   return ordersList;
-  // }
+  List<NewOrdersWithProfit> buildData(List<OrderModel> orders) {
+    List<NewOrdersWithProfit> ordersList = [];
+    for (var order in _orders) {
+      List<OrderItemModel> orderItems = [];
+      List<Map<String, dynamic>> orderItemsList =
+          List<Map<String, dynamic>>.from(jsonDecode(order.orderItemsList));
 
-  String calculateTotal(OrderItemModel item) {
+      num orderProfit = 0;
+      for (var items in orderItemsList) {
+        OrderItemModel item = OrderItemModel.fromMap(items);
+        num prodTotal = calculateTotal(item, true);
+        orderProfit += prodTotal - (item.quantity * item.cost);
+        orderItems.add(item);
+      }
+
+      ordersList.add(NewOrdersWithProfit(
+          orderId: order.orderId!,
+          orderDate: order.orderDate,
+          grandTotal: order.grandTotal,
+          total: order.total,
+          discountPercent: order.discountPercent,
+          gstPercent: order.gstPercent,
+          serviceCharges: order.serviceCharges,
+          orderItemsList: orderItems,
+          profit: orderProfit));
+    }
+    return ordersList;
+  }
+
+  dynamic calculateTotal(OrderItemModel item, bool onlyDiscountValue) {
+    num discountprice;
+    num finalPrice;
+
     if (item.itemDiscount != 0) {
-      var discountprice = item.price * (item.itemDiscount! / 100);
-      var finalPrice = item.quantity * discountprice;
+      discountprice = item.price * (item.itemDiscount! / 100);
+      finalPrice = item.quantity * discountprice;
+
+      if (onlyDiscountValue == true) {
+        return finalPrice;
+      }
+
       return '${item.price} x ${item.quantity} - ${item.itemDiscount}% = ${finalPrice.toStringAsFixed(1)}';
     } else {
+      if (onlyDiscountValue == true) {
+        return item.price * item.quantity;
+      }
       return '${item.price} x ${item.quantity} = ${item.price * item.quantity}';
     }
   }
 
   Future<void> exportAsExcel(
-      List<OrderModel> orders, BuildContext context) async {
+      List<NewOrdersWithProfit> orders, BuildContext context) async {
     final xl.Workbook workbook = xl.Workbook();
     final xl.Worksheet sheet = workbook.worksheets[0];
 
-    List<String> headings = [
-      'orderDate',
-      'orderItemsList',
-      'total',
-      'serviceCharges',
-      'gstPercent',
-      'discountPercent',
-      'grandTotal',
+    List<dynamic> headings = [
+      'Order Id',
+      'Order Date',
+      'Order Items List',
+      'Total',
+      'Service Charges',
+      'GST Percent',
+      'Discount Percent',
+      'Grand Total',
+      'Order Profit',
     ];
 
     //adding headings
@@ -159,15 +211,21 @@ class _DashboardState extends State<Dashboard> {
       headingStyle.fontSize = 15;
     }
 
-    // Add data rows
     for (int rowIndex = 0; rowIndex < orders.length; rowIndex++) {
-      OrderModel order = orders[rowIndex];
-      Map<String, dynamic> orderMap = order.toMap();
-      for (int colIndex = 0; colIndex < headings.length; colIndex++) {
-        sheet.getRangeByIndex(rowIndex + 2, colIndex + 1).setText(
-              orderMap[headings[colIndex]].toString(),
-            );
-      }
+      NewOrdersWithProfit order = orders[rowIndex];
+      String formattedOrderDate =
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(order.orderDate);
+      sheet.getRangeByIndex(rowIndex + 2, 1).setValue(order.orderId);
+      sheet.getRangeByIndex(rowIndex + 2, 2).setText(formattedOrderDate);
+      sheet
+          .getRangeByIndex(rowIndex + 2, 3)
+          .setValue(order.orderItemsList.toString());
+      sheet.getRangeByIndex(rowIndex + 2, 4).setValue(order.total);
+      sheet.getRangeByIndex(rowIndex + 2, 5).setValue(order.serviceCharges);
+      sheet.getRangeByIndex(rowIndex + 2, 6).setValue(order.gstPercent);
+      sheet.getRangeByIndex(rowIndex + 2, 7).setValue(order.discountPercent);
+      sheet.getRangeByIndex(rowIndex + 2, 8).setValue(order.grandTotal);
+      sheet.getRangeByIndex(rowIndex + 2, 9).setValue(order.profit);
     }
 
     //saving file
@@ -179,10 +237,8 @@ class _DashboardState extends State<Dashboard> {
     if (downloadsDir != null) {
       try {
         String path = downloadsDir.path;
-        final String fileName = '''Order History 
-                      $path/${DateFormat('d_MMM_yyyy').format(fromDate)} To
-                      ${DateFormat('d_MMM_yyyy').format(toDate)} .xlsx
-                      ''';
+        final String fileName =
+            '$path/Order History ${DateFormat('d_MMM_yyyy').format(fromDate)} To${DateFormat('d_MMM_yyyy').format(toDate)} .xlsx';
         final File file = File(fileName);
         await file.writeAsBytes(bytes, flush: true);
         myCustomSnackBar(
@@ -228,10 +284,17 @@ class _DashboardState extends State<Dashboard> {
                   width: 700,
                   child: SfCartesianChart(
                       primaryXAxis: DateTimeAxis(
+                        // minimum: fromDate.add(Duration(hours: 1)),
+                        // maximum: toDate.add(Durations.extralong1),
                         dateFormat: DateFormat('d MMM HH:mm'),
                       ),
                       primaryYAxis: NumericAxis(),
                       // title: ChartTitle(text: 'Grand Total'),
+                      zoomPanBehavior: ZoomPanBehavior(
+                        enablePanning: true,
+                        enableDoubleTapZooming: true,
+                        enablePinching: true,
+                      ),
                       legend: const Legend(
                           isVisible: true,
                           position: LegendPosition.top,
@@ -254,31 +317,44 @@ class _DashboardState extends State<Dashboard> {
                           );
                         },
                       ),
-                      series: <LineSeries<OrderModel, DateTime>>[
-                        LineSeries<OrderModel, DateTime>(
+                      series: <LineSeries<NewOrdersWithProfit, DateTime>>[
+                        LineSeries<NewOrdersWithProfit, DateTime>(
+                            name: 'Profit',
+                            sortingOrder: SortingOrder.ascending,
+                            sortFieldValueMapper:
+                                (NewOrdersWithProfit sales, _) =>
+                                    sales.orderDate,
+                            markerSettings: const MarkerSettings(
+                                isVisible: true, height: 4, width: 4),
+                            dataSource: ordersWithProfit,
+                            xValueMapper: (NewOrdersWithProfit sales, _) =>
+                                sales.orderDate,
+                            yValueMapper: (NewOrdersWithProfit sales, _) =>
+                                sales.profit),
+                        LineSeries<NewOrdersWithProfit, DateTime>(
                             name: 'Grand Total',
                             sortingOrder: SortingOrder.ascending,
-                            sortFieldValueMapper: (OrderModel sales, _) =>
-                                sales.orderDate,
+                            sortFieldValueMapper:
+                                (NewOrdersWithProfit sales, _) =>
+                                    sales.orderDate,
                             markerSettings: const MarkerSettings(
                                 isVisible: true, height: 4, width: 4),
-                            dataSource: _orders,
-                            xValueMapper: (OrderModel sales, _) =>
+                            dataSource: ordersWithProfit,
+                            xValueMapper: (NewOrdersWithProfit sales, _) =>
                                 sales.orderDate,
-                            yValueMapper: (OrderModel sales, _) =>
+                            yValueMapper: (NewOrdersWithProfit sales, _) =>
                                 sales.grandTotal),
-                        LineSeries<OrderModel, DateTime>(
-                            name: 'Discount value',
-                            sortingOrder: SortingOrder.ascending,
-                            sortFieldValueMapper: (OrderModel sales, _) =>
-                                sales.orderDate,
-                            markerSettings: const MarkerSettings(
-                                isVisible: true, height: 4, width: 4),
-                            dataSource: _orders,
-                            xValueMapper: (OrderModel sales, _) =>
-                                sales.orderDate,
-                            yValueMapper: (OrderModel sales, _) =>
-                                (sales.total * (sales.discountPercent / 100))),
+                        // LineSeries<LineData, DateTime>(
+                        //     name: 'Discount value',
+                        //     sortingOrder: SortingOrder.ascending,
+                        //     sortFieldValueMapper: (LineData sales, _) =>
+                        //         sales.time,
+                        //     markerSettings: const MarkerSettings(
+                        //         isVisible: true, height: 4, width: 4),
+                        //     dataSource: buildData(_orders),
+                        //     xValueMapper: (LineData sales, _) => sales.time,
+                        //     yValueMapper: (LineData sales, _) =>
+                        //         sales.discountValue),
                       ]),
                 ),
                 SizedBox(
@@ -453,7 +529,8 @@ class _DashboardState extends State<Dashboard> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                       child: ElevatedButton.icon(
-                          onPressed: () => exportAsExcel(_orders, context),
+                          onPressed: () =>
+                              exportAsExcel(ordersWithProfit, context),
                           icon: const Icon(Icons.download),
                           style: ButtonStyle(
                               foregroundColor: MaterialStateColor.resolveWith(
@@ -521,8 +598,8 @@ class _DashboardState extends State<Dashboard> {
                                       children: orderItemsList.map((temp) {
                                         OrderItemModel item =
                                             OrderItemModel.fromMap(temp);
-                                        String str = calculateTotal(item);
-
+                                        String str =
+                                            calculateTotal(item, false);
                                         return Tooltip(
                                           decoration: BoxDecoration(
                                               color: Colors.purple[700],

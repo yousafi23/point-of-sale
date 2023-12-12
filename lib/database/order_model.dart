@@ -24,6 +24,7 @@ class OrderModel {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'orderId': orderId,
       'orderDate': orderDate.toString(),
       'grandTotal': grandTotal,
       'orderItemsList': orderItemsList,
