@@ -33,10 +33,9 @@ class _OrderSelectionState extends State<OrderSelection> {
 
   int itemDiscount = 0;
 
-  final itemDiscountCont = TextEditingController();
   final discountCont = TextEditingController();
   final serviceChargesCont = TextEditingController();
-
+  // List<TextEditingController>
   @override
   void initState() {
     super.initState();
@@ -124,16 +123,17 @@ class _OrderSelectionState extends State<OrderSelection> {
                   DataCell(Text((calculateItemTotal(
                           orderItemModel.quantity, orderItemModel.price,
                           discount: orderItemModel.itemDiscount))
-                      .toString())),
+                      .toStringAsFixed(1))),
                   DataCell(
                     SizedBox(
-                      width: 30,
+                      width: 35,
                       height: 25,
                       child: TextField(
                         inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
+                          FilteringTextInputFormatter.digitsOnly,
                         ],
-                        controller: itemDiscountCont,
+                        decoration: const InputDecoration(counterText: ""),
+                        maxLength: 3,
                         onChanged: (value) async {
                           itemDiscount = int.tryParse(value) ?? 0;
 
@@ -147,12 +147,9 @@ class _OrderSelectionState extends State<OrderSelection> {
                                 'orderItemId=?',
                                 orderItemModel.orderItemId!);
 
-                            // print(newOrderItemModel);
-
                             calculateGrandTotal();
                             await _loadData();
                           } else {
-                            itemDiscountCont.text = '';
                             myCustomSnackBar(
                                 context: context,
                                 message: 'Discount can NOT be greater than 100',
@@ -230,7 +227,7 @@ class _OrderSelectionState extends State<OrderSelection> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Total'),
-                          Text('Rs ${total.toString()}'),
+                          Text('Rs ${total.toStringAsFixed(1)}'),
                         ],
                       ),
                       Row(
@@ -242,7 +239,7 @@ class _OrderSelectionState extends State<OrderSelection> {
                             children: [
                               const Text('Rs '),
                               SizedBox(
-                                width: 30,
+                                width: 45,
                                 height: 25,
                                 child: TextField(
                                   inputFormatters: [
@@ -274,12 +271,15 @@ class _OrderSelectionState extends State<OrderSelection> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               SizedBox(
-                                width: 30,
+                                width: 35,
                                 height: 25,
                                 child: TextField(
                                   inputFormatters: [
                                     FilteringTextInputFormatter.digitsOnly
                                   ],
+                                  decoration:
+                                      const InputDecoration(counterText: ""),
+                                  maxLength: 3,
                                   controller: discountCont,
                                   onChanged: (value) {
                                     int disVal = int.tryParse(value) ?? 0;
@@ -331,8 +331,6 @@ class _OrderSelectionState extends State<OrderSelection> {
                     gstPercent: gst,
                     discountPercent: discount);
 
-                // print('Model=${orderModel.toMap()}');
-                // print('str=${widget.orderItems}');
                 final bool confirmed =
                     await showPlaceOrderConfirmation(context);
                 if (confirmed) {
