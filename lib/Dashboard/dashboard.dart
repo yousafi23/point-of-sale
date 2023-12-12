@@ -541,7 +541,7 @@ class _DashboardState extends State<Dashboard> {
                                       }).toList(),
                                     ),
                                     const Divider(
-                                        color: Color.fromARGB(255, 1, 77, 4)),
+                                        color: Color.fromARGB(255, 79, 4, 93)),
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
