@@ -6,6 +6,7 @@ import 'package:point_of_sale_app/database/order_model.dart';
 import 'package:point_of_sale_app/database/size_model.dart';
 import 'package:point_of_sale_app/database/user_model.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:tuple/tuple.dart';
 
 class DatabaseHelper {
   static const dbName = 'sqlite.db';
@@ -203,19 +204,19 @@ class DatabaseHelper {
   }
 
 // changeQuantity() AND changeIngredientQuantity() CAN BE MERGED INTO 1 FUNCTION
-  Future<void> changeQuantity(int orderId, bool decrement) async {
+  Future<void> changeQuantity(int orderItemId, bool decrement) async {
     final int newQuantity;
     if (decrement == false) {
-      newQuantity = (await getQuantity(orderId) + 1);
+      newQuantity = (await getQuantity(orderItemId) + 1);
     } else {
-      newQuantity = await getQuantity(orderId) - 1;
+      newQuantity = await getQuantity(orderItemId) - 1;
     }
     final Database? db = await instance.database;
     await db?.update(
       'OrderItems',
       {'quantity': newQuantity},
       where: 'orderItemId = ?',
-      whereArgs: [orderId],
+      whereArgs: [orderItemId],
     );
   }
 
@@ -337,17 +338,18 @@ class DatabaseHelper {
     }
   }
 
-  Future<int?> productCount(String prodName) async {
+  Future<dynamic> productCount(String prodName) async {
     final Database? db = await instance.database;
     final result = await db?.rawQuery(
-        'SELECT COUNT(*) as count FROM OrderItems WHERE prodName = ?',
+        'SELECT COUNT(*),orderItemId FROM OrderItems WHERE prodName = ?',
         [prodName]);
 
     if (result != null && result.isNotEmpty) {
-      final count = Sqflite.firstIntValue(result);
-      return count;
+      var dbItem = result.first;
+      var count = dbItem['COUNT(*)'];
+      var orderItemId = dbItem['orderItemId'];
+      return [count, orderItemId ?? -1];
     }
-    return -1;
   }
 
   Future<List<SizeModel>> getProductSizes(int productId) async {

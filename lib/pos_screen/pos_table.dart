@@ -250,10 +250,12 @@ Future<void Function()?> productSelected(BuildContext context,
     quantity: 1,
   );
 
-  int? productCount =
+  var resultList =
       await DatabaseHelper.instance.productCount(productModel.prodName);
+  int productCount = resultList[0];
+  int orderItemId = resultList[1];
 
-  if (productCount! < 1) {
+  if (productCount != 1) {
     await DatabaseHelper.instance
         .insertRecord('OrderItems', orderItemModel.toMap());
 
@@ -266,9 +268,14 @@ Future<void Function()?> productSelected(BuildContext context,
         warning: false,
         context: context);
   } else {
+    await DatabaseHelper.instance.changeQuantity(orderItemId, false);
+    await DatabaseHelper.instance.updateStock(productModel.productId!, true);
+
+    reloadCallback(); // Trigger reload
+
     myCustomSnackBar(
-        message: 'Product Already in Order List!',
-        warning: true,
+        message: '${productModel.prodName}\t\t+1',
+        warning: false,
         context: context);
   }
   return null;
