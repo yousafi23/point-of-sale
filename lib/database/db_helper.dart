@@ -6,7 +6,6 @@ import 'package:point_of_sale_app/database/order_model.dart';
 import 'package:point_of_sale_app/database/size_model.dart';
 import 'package:point_of_sale_app/database/user_model.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:tuple/tuple.dart';
 
 class DatabaseHelper {
   static const dbName = 'sqlite.db';
@@ -22,9 +21,7 @@ class DatabaseHelper {
   }
 
   initDB() async {
-    Directory directory = await getApplicationCacheDirectory();
-    //SWITCH BEFORE BUILDING.
-    // Directory directory = Directory.current;
+    Directory directory = Directory.current;
     String path = join(directory.path, dbName);
     return await openDatabase(path, version: dbVersion, onCreate: onCreate);
   }

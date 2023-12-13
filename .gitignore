@@ -1,3 +1,6 @@
+#My Files To Ignore
+sqlite.db
+
 # Miscellaneous
 *.class
 *.log
