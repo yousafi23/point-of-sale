@@ -9,10 +9,19 @@ import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/database/purchase_model.dart';
+import 'package:point_of_sale_app/database/purhcase_item_model.dart';
 import 'package:point_of_sale_app/general/drawer.dart';
 import 'package:point_of_sale_app/general/my_custom_appbar.dart';
 import 'package:point_of_sale_app/general/my_custom_snackbar.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xl;
+
+class PieData {
+  PieData(this.name, this.totalPurchasedValue, this.totalQty);
+  final String name;
+  final num totalPurchasedValue;
+  final num totalQty;
+}
 
 class PurchaseHistory extends StatefulWidget {
   const PurchaseHistory({super.key});
@@ -23,6 +32,14 @@ class PurchaseHistory extends StatefulWidget {
 
 class _PurchaseHistoryState extends State<PurchaseHistory> {
   List<PurchaseModel> purchases = [];
+  String orderByField = 'purchaseDate';
+  String sortByFeild = 'ASC';
+  DateTime toDate = DateTime.now();
+  DateTime fromDate = DateTime.now().subtract(const Duration(days: 30));
+  List<String> dropDownItemsList = [
+    'purchaseDate',
+    'grandTotal',
+  ];
 
   @override
   void initState() {
@@ -32,8 +49,12 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
 
   Future<void> _loadData() async {
     final database = await DatabaseHelper.instance.database;
-    final result = await database?.query('Purchases');
+    final result = await database?.query('Purchases',
+        orderBy: '$orderByField $sortByFeild',
+        where: 'purchaseDate BETWEEN ? AND ?',
+        whereArgs: [fromDate.toString(), toDate.toString()]);
 
+    purchases = [];
     setState(() {
       if (result != null) {
         for (var purchase in result) {
@@ -41,6 +62,49 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
         }
       }
     });
+  }
+
+  String formatFieldName(String input) {
+    String str = input.replaceAllMapped(
+      RegExp(r'(^|(?<=[a-z]))[A-Z]'),
+      (match) => (match.group(1) != null ? ' ' : '') + match.group(0)!,
+    );
+    str = str.replaceRange(0, 1, str[0].toUpperCase());
+    return str;
+  }
+
+  List<PieData> groupByProducts() {
+    List<PieData> groupedList = [];
+    Map<String, Map<String, dynamic>> groupedItems = {};
+
+    for (var purchase in purchases) {
+      List<Map<String, dynamic>> purchaseItemsList =
+          List<Map<String, dynamic>>.from(
+              jsonDecode(purchase.purchaseItemsList));
+
+      for (var item in purchaseItemsList) {
+        PurchaseItemModel purchaseItem = PurchaseItemModel.fromMap(item);
+
+        // Check if the product name is already in the grouped map
+        if (groupedItems.containsKey(purchaseItem.name)) {
+          // If yes, update the existing entry
+          groupedItems[purchaseItem.name]!['price'] +=
+              purchaseItem.price * purchaseItem.quantity;
+          groupedItems[purchaseItem.name]!['quantity'] += purchaseItem.quantity;
+        } else {
+          // If not, create a new entry in the grouped map
+          groupedItems[purchaseItem.name] = {
+            'price': purchaseItem.price * purchaseItem.quantity,
+            'quantity': purchaseItem.quantity,
+          };
+        }
+      }
+    }
+
+    groupedItems.forEach((prodName, data) {
+      groupedList.add(PieData(prodName, data['price'], data['quantity']));
+    });
+    return groupedList;
   }
 
   Future<void> exportAsExcel(
@@ -110,22 +174,6 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
 
   @override
   Widget build(BuildContext context) {
-    if (purchases.isEmpty) {
-      return Scaffold(
-        drawer: const ReusableDrawer(
-          title: 'Purchase History',
-          currentPage: PurchaseHistory(),
-        ),
-        appBar: myCustomAppBar(
-          "Purchase History",
-          const Color.fromARGB(255, 2, 122, 4),
-        ),
-        body: const Center(
-          child: Text('No Purchases yet'),
-        ),
-      );
-    }
-
     return Scaffold(
       drawer: const ReusableDrawer(
         title: 'Purchase History',
@@ -174,7 +222,9 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                   .format(purchase.purchaseDate),
                               style: const TextStyle(fontSize: 13),
                             ),
-                            Text('Total: ${purchase.grandTotal.toString()}'),
+                            Text(purchase.grandTotal.toString(),
+                                style: const TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         children: [
@@ -203,17 +253,307 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-              child: ElevatedButton.icon(
-                  onPressed: () => exportAsExcel(purchases, context),
-                  icon: const Icon(Icons.download),
-                  style: ButtonStyle(
-                      overlayColor: MaterialStateColor.resolveWith(
-                          (states) => Colors.green.shade50),
-                      foregroundColor: MaterialStateColor.resolveWith(
-                          (states) => Colors.green.shade700)),
-                  label: const Text('Export as Excel')),
+            const SizedBox(width: 25),
+            Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.green.shade50,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(90, 0, 90, 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('Sort By\t'),
+                        SizedBox(
+                          height: 20,
+                          child: DropdownButton<String>(
+                            underline: const SizedBox(),
+                            focusColor: Colors.transparent,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black),
+                            value: orderByField,
+                            onChanged: (value) {
+                              setState(() {
+                                orderByField = value!;
+                                _loadData();
+                              });
+                            },
+                            items: dropDownItemsList
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(formatFieldName(value)),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        Tooltip(
+                          message: 'High to Low',
+                          child: GestureDetector(
+                              child: const Icon(Icons.arrow_upward_rounded),
+                              onTap: () {
+                                setState(() {
+                                  sortByFeild = 'DESC';
+                                  _loadData();
+                                });
+                              }),
+                        ),
+                        Tooltip(
+                          message: 'Low to High',
+                          child: GestureDetector(
+                              child: const Icon(Icons.arrow_downward_rounded),
+                              onTap: () {
+                                setState(() {
+                                  sortByFeild = 'ASC';
+                                  _loadData();
+                                });
+                              }),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(15, 5, 5, 0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'from ',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                              GestureDetector(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5),
+                                    color: Colors.green.shade200,
+                                  ),
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(2, 0, 2, 0),
+                                    child: Text(
+                                      DateFormat('d MMM yyyy').format(fromDate),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                onTap: () async {
+                                  fromDate = (await showDatePicker(
+                                      context: context,
+                                      initialDate: fromDate,
+                                      firstDate: DateTime(2000),
+                                      lastDate: DateTime.now()))!;
+                                  setState(() {});
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(5, 5, 15, 0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'To ',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                              GestureDetector(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5),
+                                    color: Colors.green.shade200,
+                                  ),
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(2, 0, 2, 0),
+                                    child: Text(
+                                      DateFormat('d MMM yyyy').format(toDate),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                                onTap: () async {
+                                  toDate = (await showDatePicker(
+                                      context: context,
+                                      initialDate: toDate,
+                                      firstDate: DateTime(2000),
+                                      lastDate: DateTime.now()))!;
+                                  setState(() {});
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        ElevatedButton(
+                            onPressed: () => _loadData(),
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green.shade500,
+                                foregroundColor: Colors.white),
+                            child: const Text('Filter')),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                          child: ElevatedButton.icon(
+                              onPressed: () =>
+                                  exportAsExcel(purchases, context),
+                              icon: const Icon(Icons.download),
+                              style: ButtonStyle(
+                                  overlayColor: MaterialStateColor.resolveWith(
+                                      (states) => Colors.green.shade50),
+                                  foregroundColor:
+                                      MaterialStateColor.resolveWith(
+                                          (states) => Colors.green.shade700)),
+                              label: const Text('Export as Excel')),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                purchases.isEmpty
+                    ? Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.red),
+                        child: const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(15),
+                            child: Text('No Purchases Available.',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 20)),
+                          ),
+                        ))
+                    : SizedBox(
+                        width: 750,
+                        child: SfCartesianChart(
+                            primaryXAxis: DateTimeAxis(
+                              // minimum: fromDate.add(Duration(hours: 1)),
+                              // maximum: toDate.add(Durations.extralong1),
+                              dateFormat: DateFormat('d MMM'),
+                            ),
+                            primaryYAxis: NumericAxis(),
+                            title: ChartTitle(text: 'Purchases'),
+                            zoomPanBehavior: ZoomPanBehavior(
+                              enablePanning: true,
+                              enableDoubleTapZooming: true,
+                              enablePinching: true,
+                            ),
+                            legend: const Legend(
+                                isVisible: true,
+                                position: LegendPosition.top,
+                                offset: Offset(1, 1)),
+                            tooltipBehavior: TooltipBehavior(
+                              color: Colors.green[600],
+                              duration: 5,
+                              enable: true,
+                              builder: (data, point, series, pointIndex,
+                                  seriesIndex) {
+                                return Container(
+                                  padding: const EdgeInsets.all(5),
+                                  child: Text(
+                                      '${DateFormat('d MMM yyyy h:mm a').format(point.x)}\n${point.y}',
+                                      style: const TextStyle(
+                                          fontSize: 12, color: Colors.white)),
+                                );
+                              },
+                            ),
+                            series: <LineSeries<PurchaseModel, DateTime>>[
+                              LineSeries<PurchaseModel, DateTime>(
+                                  name: 'Total',
+                                  markerSettings: const MarkerSettings(
+                                      isVisible: true, height: 4, width: 4),
+                                  color: Colors.green.shade700,
+                                  sortingOrder: SortingOrder.ascending,
+                                  sortFieldValueMapper:
+                                      (PurchaseModel data, _) =>
+                                          data.purchaseDate,
+                                  dataSource: purchases,
+                                  xValueMapper: (PurchaseModel data, _) =>
+                                      data.purchaseDate,
+                                  yValueMapper: (PurchaseModel data, _) =>
+                                      data.grandTotal),
+                            ]),
+                      ),
+                const SizedBox(height: 15),
+                Row(
+                  children: [
+                    Card(
+                      color: Colors.green.shade100,
+                      elevation: 0,
+                      child: SizedBox(
+                        width: 400,
+                        child: SfCircularChart(
+                          title: ChartTitle(
+                            text: 'Ingredients Purchased By Quantity',
+                            alignment: ChartAlignment.center,
+                          ),
+                          series: <CircularSeries>[
+                            PieSeries<PieData, String>(
+                              dataSource: groupByProducts(),
+                              xValueMapper: (PieData data, _) => data.name,
+                              yValueMapper: (PieData data, _) => data.totalQty,
+                              dataLabelMapper: (PieData data, _) => data.name,
+                              dataLabelSettings: const DataLabelSettings(
+                                isVisible: true,
+                                labelPosition: ChartDataLabelPosition.outside,
+                                textStyle: TextStyle(),
+                                connectorLineSettings: ConnectorLineSettings(
+                                    type: ConnectorType.line),
+                              ),
+                              explode: true,
+                              explodeGesture: ActivationMode.singleTap,
+                              enableTooltip: true,
+                            )
+                          ],
+                          tooltipBehavior: TooltipBehavior(enable: true),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 15),
+                    Card(
+                      color: Colors.green.shade100,
+                      elevation: 0,
+                      child: SizedBox(
+                        width: 400,
+                        child: SfCircularChart(
+                          title: ChartTitle(
+                            text: 'Ingredients Purchased By Value',
+                            alignment: ChartAlignment.center,
+                          ),
+                          series: <CircularSeries>[
+                            PieSeries<PieData, String>(
+                              dataSource: groupByProducts(),
+                              xValueMapper: (PieData data, _) => data.name,
+                              yValueMapper: (PieData data, _) =>
+                                  data.totalPurchasedValue,
+                              dataLabelMapper: (PieData data, _) => data.name,
+                              dataLabelSettings: const DataLabelSettings(
+                                isVisible: true,
+                                labelPosition: ChartDataLabelPosition.outside,
+                                textStyle: TextStyle(),
+                                connectorLineSettings: ConnectorLineSettings(
+                                    type: ConnectorType.line),
+                                // useSeriesColor: true,
+                                // labelIntersectAction: LabelIntersectAction.shift,
+                              ),
+                              explode: true,
+                              explodeGesture: ActivationMode.singleTap,
+                              // groupMode: CircularChartGroupMode.point,
+                              // As the grouping mode is point, 2 points will be grouped
+                              // groupTo: 5,
+                              enableTooltip: true,
+                            )
+                          ],
+                          tooltipBehavior: TooltipBehavior(enable: true),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
             ),
           ],
         ),

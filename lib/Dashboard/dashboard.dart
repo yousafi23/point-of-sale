@@ -543,9 +543,18 @@ class _DashboardState extends State<Dashboard> {
             ),
             Expanded(
               child: _orders.isEmpty
-                  ? const Center(
-                      child: Text('No orders available.'),
-                    )
+                  ? Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.red),
+                      child: const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(15),
+                          child: Text('No Orders Available.',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20)),
+                        ),
+                      ))
                   : Padding(
                       padding: const EdgeInsets.all(15.0),
                       child: GridView.builder(
