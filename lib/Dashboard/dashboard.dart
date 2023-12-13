@@ -238,7 +238,7 @@ class _DashboardState extends State<Dashboard> {
       try {
         String path = downloadsDir.path;
         final String fileName =
-            '$path/Order History ${DateFormat('d_MMM_yyyy').format(fromDate)} To${DateFormat('d_MMM_yyyy').format(toDate)} .xlsx';
+            '$path/Order History ${DateFormat('d/MMM/yyyy').format(fromDate)} To ${DateFormat('d/MMM/yyyy').format(toDate)}.xlsx';
         final File file = File(fileName);
         await file.writeAsBytes(bytes, flush: true);
         myCustomSnackBar(
@@ -520,6 +520,22 @@ class _DashboardState extends State<Dashboard> {
                         ],
                       ),
                     ),
+                    Tooltip(
+                      message: 'Reset Filters',
+                      child: GestureDetector(
+                          child: const Icon(
+                            Icons.refresh,
+                          ),
+                          onTap: () {
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (BuildContext context) =>
+                                        super.widget));
+                            // setState(() {});
+                          }),
+                    ),
+                    const SizedBox(width: 10),
                     ElevatedButton(
                         onPressed: () => _loadOrdersData(),
                         style: ElevatedButton.styleFrom(
@@ -548,12 +564,9 @@ class _DashboardState extends State<Dashboard> {
                           borderRadius: BorderRadius.circular(10),
                           color: Colors.red),
                       child: const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(15),
-                          child: Text('No Orders Available.',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 20)),
-                        ),
+                        child: Text('No Orders Available.',
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 20)),
                       ))
                   : Padding(
                       padding: const EdgeInsets.all(15.0),

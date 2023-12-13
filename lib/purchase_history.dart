@@ -148,7 +148,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
     if (downloadsDir != null) {
       try {
         String path = downloadsDir.path;
-        final String fileName = '$path/Purchases.xlsx';
+        final String fileName = '$path/Purchases History ${DateFormat('d/MMM/yyyy').format(fromDate)} To ${DateFormat('d/MMM/yyyy').format(toDate)}.xlsx';
         final File file = File(fileName);
         await file.writeAsBytes(bytes, flush: true);
         myCustomSnackBar(
@@ -389,6 +389,22 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                             ],
                           ),
                         ),
+                        Tooltip(
+                          message: 'Reset Filters',
+                          child: GestureDetector(
+                              child: const Icon(
+                                Icons.refresh,
+                              ),
+                              onTap: () {
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            super.widget));
+                                // setState(() {});
+                              }),
+                        ),
+                        const SizedBox(width: 10),
                         ElevatedButton(
                             onPressed: () => _loadData(),
                             style: ElevatedButton.styleFrom(
