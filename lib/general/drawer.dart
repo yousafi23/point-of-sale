@@ -48,13 +48,19 @@ class ReusableDrawer extends StatelessWidget {
               if (snapshot.connectionState == ConnectionState.done &&
                   snapshot.hasData) {
                 final CompanyModel company = snapshot.data!;
-                // print(snapshot.data);
                 return Image.memory(
                   company.companyLogo,
                   fit: BoxFit.cover,
                 );
               } else {
-                return const Center(child: CircularProgressIndicator());
+                return Container(
+                  color: Colors.purple.shade100,
+                  width: 200,
+                  height: 200,
+                  child: const Center(
+                    child: Icon(Icons.image_outlined, size: 50),
+                  ),
+                );
               }
             },
           ),
