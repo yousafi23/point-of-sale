@@ -33,7 +33,7 @@ class PurchaseHistory extends StatefulWidget {
 class _PurchaseHistoryState extends State<PurchaseHistory> {
   List<PurchaseModel> purchases = [];
   String orderByField = 'purchaseDate';
-  String sortByFeild = 'ASC';
+  String sortByFeild = 'DESC';
   DateTime toDate = DateTime.now();
   DateTime fromDate = DateTime.now().subtract(const Duration(days: 30));
   List<String> dropDownItemsList = [
@@ -113,6 +113,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
     final xl.Worksheet sheet = workbook.worksheets[0];
 
     List<String> headings = [
+      'purchaseId',
       'purchaseDate',
       'purchaseItemsList',
       'grandTotal',
@@ -131,10 +132,10 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
     // Add data rows
     for (int rowIndex = 0; rowIndex < purchases.length; rowIndex++) {
       PurchaseModel purchase = purchases[rowIndex];
-      Map<String, dynamic> orderMap = purchase.toMap();
+      Map<String, dynamic> purchaseMap = purchase.toMap();
       for (int colIndex = 0; colIndex < headings.length; colIndex++) {
         sheet.getRangeByIndex(rowIndex + 2, colIndex + 1).setText(
-              orderMap[headings[colIndex]].toString(),
+              purchaseMap[headings[colIndex]].toString(),
             );
       }
     }
@@ -148,7 +149,8 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
     if (downloadsDir != null) {
       try {
         String path = downloadsDir.path;
-        final String fileName = '$path/Purchases History ${DateFormat('d/MMM/yyyy').format(fromDate)} To ${DateFormat('d/MMM/yyyy').format(toDate)}.xlsx';
+        final String fileName =
+            '$path/Purchases History ${DateFormat('d_MMM_yyyy').format(fromDate)} To ${DateFormat('d_MMM_yyyy').format(toDate)}.xlsx';
         final File file = File(fileName);
         await file.writeAsBytes(bytes, flush: true);
         myCustomSnackBar(

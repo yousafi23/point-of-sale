@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:point_of_sale_app/database/purchase_model.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xl;
 
@@ -62,6 +63,7 @@ class _DashboardState extends State<Dashboard> {
   DateTime toDate = DateTime.now();
   DateTime fromDate = Jiffy.now().subtract(days: 30).dateTime;
   List<NewOrdersWithProfit> ordersWithProfit = [];
+  String exportReport = 'Sale and Purchase';
   List<String> dropDownItemsList = [
     'orderDate',
     'grandTotal',
@@ -83,14 +85,14 @@ class _DashboardState extends State<Dashboard> {
       fromDate: fromDate.toString(),
       toDate: toDate.toString(),
     );
-    // final result2 = buildData(_orders);
     setState(() {
       _orders = result!;
       ordersWithProfit = buildData(_orders);
+      groupByOrders(_orders);
     });
   }
 
-  List<PieData> groupByProducts(List<OrderModel> orders) {
+  List<PieData> groupByProducts() {
     List<PieData> groupedList = [];
     Map<String, Map<String, dynamic>> groupedItems = {};
 
@@ -101,14 +103,11 @@ class _DashboardState extends State<Dashboard> {
       for (var item in orderItemsList) {
         OrderItemModel orderItem = OrderItemModel.fromMap(item);
 
-        // Check if the product name is already in the grouped map
         if (groupedItems.containsKey(orderItem.prodName)) {
-          // If yes, update the existing entry
           groupedItems[orderItem.prodName]!['price'] +=
               orderItem.price * orderItem.quantity;
           groupedItems[orderItem.prodName]!['quantity'] += orderItem.quantity;
         } else {
-          // If not, create a new entry in the grouped map
           groupedItems[orderItem.prodName] = {
             'price': orderItem.price * orderItem.quantity,
             'quantity': orderItem.quantity,
@@ -118,11 +117,128 @@ class _DashboardState extends State<Dashboard> {
     }
 
     groupedItems.forEach((prodName, data) {
-      // print(groupedItems.runtimeType);
-      // print('$prodName, ${data['price']}, ${data['quantity']}');
       groupedList.add(PieData(prodName, data['price'], data['quantity']));
     });
     return groupedList;
+  }
+
+  Map<String, double> groupByOrders(List<OrderModel> orders) {
+    Map<String, double> groupedItems = {};
+    for (var order in orders) {
+      var orderDate = DateFormat('dd-MMM-yyyy').format(order.orderDate);
+      if (groupedItems.containsKey(orderDate)) {
+        groupedItems[orderDate] = groupedItems[orderDate]! + order.grandTotal;
+      } else {
+        groupedItems[orderDate] = order.grandTotal;
+      }
+    }
+    return groupedItems;
+  }
+
+  Map<String, double> groupByPurchase(List<PurchaseModel> purchases) {
+    Map<String, double> groupedItems = {};
+    for (var purchase in purchases) {
+      var orderDate = DateFormat('dd-MMM-yyyy').format(purchase.purchaseDate);
+      if (groupedItems.containsKey(orderDate)) {
+        groupedItems[orderDate] =
+            groupedItems[orderDate]! + purchase.grandTotal;
+      } else {
+        groupedItems[orderDate] = purchase.grandTotal;
+      }
+    }
+    return groupedItems;
+  }
+
+  Future<void> excelProfits(
+      List<OrderModel> orders, BuildContext context) async {
+    final xl.Workbook workbook = xl.Workbook();
+    final xl.Worksheet sheet = workbook.worksheets[0];
+    List<PurchaseModel> purchases = [];
+    List<dynamic> headings = [
+      'Purchase Date',
+      'Purchase Value',
+      'Sale Date',
+      'Sale Value',
+    ];
+
+    //adding headings
+    for (int colIndex = 0; colIndex < headings.length; colIndex++) {
+      sheet.getRangeByIndex(1, colIndex + 1).setText(headings[colIndex]);
+      //styling headings
+      sheet.setColumnWidthInPixels(colIndex + 1, 100);
+      xl.Style headingStyle = sheet.getRangeByIndex(1, colIndex + 1).cellStyle;
+      headingStyle.bold = true;
+      headingStyle.fontSize = 15;
+    }
+    xl.Style purchaseStyle = sheet.getRangeByIndex(1, 1, 1, 2).cellStyle;
+    purchaseStyle.fontColor = '#A82323';
+    xl.Style saleStyle = sheet.getRangeByIndex(1, 3, 1, 4).cellStyle;
+    saleStyle.fontColor = '#23751A';
+
+    final database = await DatabaseHelper.instance.database;
+    final result = await database?.query('Purchases',
+        where: 'purchaseDate BETWEEN ? AND ?',
+        whereArgs: [fromDate.toString(), toDate.toString()]);
+    if (result != null) {
+      for (var purchase in result) {
+        purchases.add(PurchaseModel.fromMap(purchase));
+      }
+    }
+    var purchaseList = groupByPurchase(purchases).entries;
+    var saleList = groupByOrders(orders).entries;
+
+    for (int rowIndex = 0; rowIndex < purchaseList.length; rowIndex++) {
+      int colIndex = 1;
+      sheet
+          .getRangeByIndex(rowIndex + 2, colIndex++)
+          .setValue(purchaseList.elementAt(rowIndex).key);
+      sheet
+          .getRangeByIndex(rowIndex + 2, colIndex++)
+          .setValue(purchaseList.elementAt(rowIndex).value);
+    }
+
+    for (int rowIndex = 0; rowIndex < saleList.length; rowIndex++) {
+      int colIndex = 3;
+      sheet
+          .getRangeByIndex(rowIndex + 2, colIndex++)
+          .setValue(saleList.elementAt(rowIndex).key);
+      sheet
+          .getRangeByIndex(rowIndex + 2, colIndex++)
+          .setValue(saleList.elementAt(rowIndex).value);
+    }
+
+    //saving file
+    final List<int> bytes = workbook.saveAsStream();
+    //freeing memory
+    workbook.dispose();
+
+    final Directory? downloadsDir = await getDownloadsDirectory();
+    if (downloadsDir != null) {
+      try {
+        String path = downloadsDir.path;
+        final String fileName =
+            '$path/Sale and Purchase ${DateFormat('d_MMM_yyyy').format(fromDate)} To ${DateFormat('d_MMM_yyyy').format(toDate)}.xlsx';
+        final File file = File(fileName);
+        await file.writeAsBytes(bytes, flush: true);
+        myCustomSnackBar(
+            context: context,
+            message: 'Saved to:  $fileName',
+            warning: false,
+            duration: 10);
+        OpenFile.open(fileName);
+      } on Exception catch (e) {
+        myCustomSnackBar(
+            context: context,
+            message: e.toString(),
+            warning: true,
+            duration: 15);
+      }
+    } else {
+      myCustomSnackBar(
+          context: context,
+          message: 'Error: Unable to get the downloads directory.',
+          warning: true);
+    }
   }
 
   String formatFieldName(String input) {
@@ -184,7 +300,7 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
-  Future<void> exportAsExcel(
+  Future<void> exportOrderHistory(
       List<NewOrdersWithProfit> orders, BuildContext context) async {
     final xl.Workbook workbook = xl.Workbook();
     final xl.Worksheet sheet = workbook.worksheets[0];
@@ -238,7 +354,7 @@ class _DashboardState extends State<Dashboard> {
       try {
         String path = downloadsDir.path;
         final String fileName =
-            '$path/Order History ${DateFormat('d/MMM/yyyy').format(fromDate)} To ${DateFormat('d/MMM/yyyy').format(toDate)}.xlsx';
+            '$path/Order History ${DateFormat('d_MMM_yyyy').format(fromDate)} To ${DateFormat('d_MMM_yyyy').format(toDate)}.xlsx';
         final File file = File(fileName);
         await file.writeAsBytes(bytes, flush: true);
         myCustomSnackBar(
@@ -366,7 +482,7 @@ class _DashboardState extends State<Dashboard> {
                     ),
                     series: <CircularSeries>[
                       PieSeries<PieData, String>(
-                        dataSource: groupByProducts(_orders),
+                        dataSource: groupByProducts(),
                         // pointColorMapper: (PieData data, _) => data.qty,
                         xValueMapper: (PieData data, _) => data.name,
                         yValueMapper: (PieData data, _) => data.totalQty,
@@ -479,6 +595,7 @@ class _DashboardState extends State<Dashboard> {
                                   firstDate: DateTime(2000),
                                   lastDate: DateTime.now()))!;
                               setState(() {});
+                              await _loadOrdersData();
                             },
                           ),
                         ],
@@ -515,6 +632,7 @@ class _DashboardState extends State<Dashboard> {
                                   firstDate: DateTime(2000),
                                   lastDate: DateTime.now()))!;
                               setState(() {});
+                              await _loadOrdersData();
                             },
                           ),
                         ],
@@ -542,11 +660,35 @@ class _DashboardState extends State<Dashboard> {
                             backgroundColor: Colors.purple.shade500,
                             foregroundColor: Colors.white),
                         child: const Text('Filter')),
+                    SizedBox(width: 10),
+                    SizedBox(
+                      height: 20,
+                      child: DropdownButton<String>(
+                        underline: const SizedBox(),
+                        focusColor: Colors.transparent,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.black),
+                        value: exportReport,
+                        onChanged: (value) {
+                          setState(() {
+                            exportReport = value!;
+                          });
+                        },
+                        items: ['Sale and Purchase', 'Order History']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                      ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                       child: ElevatedButton.icon(
-                          onPressed: () =>
-                              exportAsExcel(ordersWithProfit, context),
+                          onPressed: () => exportReport == 'Sale and Purchase'
+                              ? excelProfits(_orders, context)
+                              : exportOrderHistory(ordersWithProfit, context),
                           icon: const Icon(Icons.download),
                           style: ButtonStyle(
                               foregroundColor: MaterialStateColor.resolveWith(

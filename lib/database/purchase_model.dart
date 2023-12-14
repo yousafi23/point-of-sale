@@ -30,6 +30,7 @@ class PurchaseModel {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'purchaseId': purchaseId,
       'purchaseDate': purchaseDate.toString(),
       'grandTotal': grandTotal,
       'purchaseItemsList': purchaseItemsList,
