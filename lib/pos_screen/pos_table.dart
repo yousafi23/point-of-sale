@@ -160,10 +160,7 @@ class PosTableCategory extends StatelessWidget {
             DataCell(Text(productModel.stock.toString())),
             DataCell(Text(productModel.unitPrice.toString())),
             DataCell(
-              GestureDetector(
-                  child: _buildAddButton(row['productId']),
-                  onTap: () =>
-                      productSelected(context, productModel, reloadCallback)),
+              _buildAddButton(row['productId'], productModel),
             ),
           ],
         );
@@ -171,7 +168,7 @@ class PosTableCategory extends StatelessWidget {
     );
   }
 
-  Widget _buildAddButton(int productId) {
+  Widget _buildAddButton(int productId, productModel) {
     return FutureBuilder<List<SizeModel>>(
       future: DatabaseHelper.instance.getProductSizes(productId),
       builder: (context, snapshot) {
@@ -185,8 +182,11 @@ class PosTableCategory extends StatelessWidget {
               sizes: snapshot.data!, reloadCallback: reloadCallback);
         } else {
           // If no sizes, display the add button
-          return const Icon(
-            Icons.add,
+          return GestureDetector(
+            onTap: () => productSelected(context, productModel, reloadCallback),
+            child: const Icon(
+              Icons.add,
+            ),
           );
         }
       },
