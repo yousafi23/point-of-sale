@@ -1,7 +1,9 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, must_be_immutable
 
 import 'package:flutter/material.dart';
-import 'package:point_of_sale_app/admin/products_screen.dart';
+import 'package:get/get.dart';
+import 'package:point_of_sale_app/Dashboard/dashboard.dart';
+import 'package:point_of_sale_app/controllers/login_controller.dart';
 import 'package:point_of_sale_app/database/company_model.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/database/user_model.dart';
@@ -11,6 +13,7 @@ import 'package:point_of_sale_app/pos_screen/pos_screen.dart';
 class LoginScreen extends StatelessWidget {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
+  LogInController logInController = Get.put(LogInController());
 
   LoginScreen({super.key});
 
@@ -98,28 +101,20 @@ class LoginScreen extends StatelessWidget {
 
                           if (user != null) {
                             if (user.isAdmin) {
+                              logInController.setIsAdmin(user.isAdmin);
                               myCustomSnackBar(
                                 message: 'Admin LogIn: ${user.name}',
                                 warning: false,
                                 context: context,
                               );
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ProductsScreen(),
-                                ),
-                              );
+                              Get.to(() => const Dashboard());
                             } else {
+                              logInController.setIsAdmin(user.isAdmin);
                               myCustomSnackBar(
                                   message: 'User LogIn: ${user.name}',
                                   warning: false,
                                   context: context);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const PosScreen(),
-                                ),
-                              );
+                              Get.to(() => const PosScreen());
                             }
                           } else {
                             myCustomSnackBar(
@@ -128,7 +123,10 @@ class LoginScreen extends StatelessWidget {
                                 context: context);
                           }
                         },
-                        child: const Text('Login'),
+                        style: ButtonStyle(
+                            backgroundColor: MaterialStateColor.resolveWith(
+                                (states) => Colors.purple.shade700)),
+                        child: const Text('Log In'),
                       ),
                     ],
                   ),

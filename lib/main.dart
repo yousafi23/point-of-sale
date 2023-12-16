@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:point_of_sale_app/Dashboard/dashboard.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -19,7 +20,7 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Yousaf',
       theme: ThemeData(
           primaryColor: Colors.white,
