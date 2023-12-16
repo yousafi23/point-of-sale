@@ -1,9 +1,13 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
 import 'package:point_of_sale_app/Dashboard/dashboard.dart';
 import 'package:point_of_sale_app/admin/ingredients_screen.dart';
 import 'package:point_of_sale_app/admin/products_screen.dart';
 import 'package:point_of_sale_app/admin/users_screen.dart';
 import 'package:point_of_sale_app/company_settings.dart';
+import 'package:point_of_sale_app/controllers/login_controller.dart';
 import 'package:point_of_sale_app/database/company_model.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/login_screen.dart';
@@ -24,6 +28,8 @@ class ReusableDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LogInController logInController = Get.find();
+
     ListTile createDrawerItem({
       required String title,
       required Widget page,
@@ -64,38 +70,44 @@ class ReusableDrawer extends StatelessWidget {
               }
             },
           ),
-          createDrawerItem(
-            title: 'Dashboard',
-            page: const Dashboard(),
-          ),
-          createDrawerItem(
-            title: 'Products',
-            page: const ProductsScreen(),
-          ),
-          createDrawerItem(
-            title: 'Ingredients',
-            page: const IngredientsScreen(),
-          ),
+          if (logInController.isAdmin == true)
+            createDrawerItem(
+              title: 'Dashboard',
+              page: const Dashboard(),
+            ),
+          if (logInController.isAdmin == true)
+            createDrawerItem(
+              title: 'Products',
+              page: const ProductsScreen(),
+            ),
+          if (logInController.isAdmin == true)
+            createDrawerItem(
+              title: 'Ingredients',
+              page: const IngredientsScreen(),
+            ),
           createDrawerItem(
             title: 'POP',
             page: const PopScreen(),
           ),
-          createDrawerItem(
-            title: 'Purchase History',
-            page: const PurchaseHistory(),
-          ),
-          createDrawerItem(
-            title: 'Users',
-            page: const UsersScreen(),
-          ),
+          if (logInController.isAdmin == true)
+            createDrawerItem(
+              title: 'Purchase History',
+              page: const PurchaseHistory(),
+            ),
+          if (logInController.isAdmin == true)
+            createDrawerItem(
+              title: 'Users',
+              page: const UsersScreen(),
+            ),
           createDrawerItem(
             title: 'Orders',
             page: const OrderViewScreen(),
           ),
-          createDrawerItem(
-            title: 'Company Settings',
-            page: const CompanySettingsScreen(),
-          ),
+          if (logInController.isAdmin == true)
+            createDrawerItem(
+              title: 'Company Settings',
+              page: const CompanySettingsScreen(),
+            ),
           createDrawerItem(
             title: 'POS',
             page: const PosScreen(),
