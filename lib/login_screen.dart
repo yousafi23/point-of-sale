@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:point_of_sale_app/Dashboard/dashboard.dart';
+import 'package:point_of_sale_app/dashboard.dart';
 import 'package:point_of_sale_app/controllers/login_controller.dart';
 import 'package:point_of_sale_app/database/company_model.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';

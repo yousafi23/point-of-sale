@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:point_of_sale_app/admin/products_screen.dart';
+import 'package:point_of_sale_app/dashboard.dart';
 import 'package:point_of_sale_app/database/company_model.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/general/my_custom_appbar.dart';
@@ -169,8 +169,8 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
               onPressed: () async {
                 await _saveToDatabase();
 
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const ProductsScreen()));
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const Dashboard()));
                 myCustomSnackBar(
                     message: 'Company settings Saved',
                     warning: false,
