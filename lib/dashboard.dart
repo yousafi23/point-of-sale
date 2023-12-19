@@ -124,8 +124,9 @@ class _DashboardState extends State<Dashboard> {
 
   Map<String, double> groupByOrders(List<OrderModel> orders) {
     Map<String, double> groupedItems = {};
+
     for (var order in orders) {
-      var orderDate = DateFormat('dd-MMM-yyyy').format(order.orderDate);
+      var orderDate = DateFormat('yyyyMMdd').format(order.orderDate);
       if (groupedItems.containsKey(orderDate)) {
         groupedItems[orderDate] = groupedItems[orderDate]! + order.grandTotal;
       } else {
@@ -138,7 +139,7 @@ class _DashboardState extends State<Dashboard> {
   Map<String, double> groupByPurchase(List<PurchaseModel> purchases) {
     Map<String, double> groupedItems = {};
     for (var purchase in purchases) {
-      var orderDate = DateFormat('dd-MMM-yyyy').format(purchase.purchaseDate);
+      var orderDate = DateFormat('yyyyMMdd').format(purchase.purchaseDate);
       if (groupedItems.containsKey(orderDate)) {
         groupedItems[orderDate] =
             groupedItems[orderDate]! + purchase.grandTotal;
@@ -149,30 +150,59 @@ class _DashboardState extends State<Dashboard> {
     return groupedItems;
   }
 
+  Map<String, Map<String, dynamic>> mergeLists(
+      Iterable<MapEntry<String, double>> saleList,
+      Iterable<MapEntry<String, double>> purchaseList) {
+    Map<String, Map<String, dynamic>> resultMap = {};
+
+    for (var entry in saleList) {
+      resultMap[entry.key] = {
+        'sale': entry.value,
+        'purchase': 0,
+      };
+    }
+
+    for (var entry in purchaseList) {
+      if (resultMap.containsKey(entry.key)) {
+        resultMap[entry.key]!['purchase'] = entry.value;
+      } else {
+        resultMap[entry.key] = {
+          'sale': 0,
+          'purchase': entry.value,
+        };
+      }
+    }
+
+    var sortedByDate = Map.fromEntries(
+        resultMap.entries.toList()..sort((e2, e1) => e1.key.compareTo(e2.key)));
+
+    return sortedByDate;
+  }
+
   Future<void> excelProfits(
       List<OrderModel> orders, BuildContext context) async {
     final xl.Workbook workbook = xl.Workbook();
     final xl.Worksheet sheet = workbook.worksheets[0];
     List<PurchaseModel> purchases = [];
     List<dynamic> headings = [
-      'Purchase Date',
-      'Purchase Value',
-      'Sale Date',
-      'Sale Value',
+      'DATE',
+      'PURCHASE',
+      'SALE',
+      'PROFIT',
     ];
 
     //adding headings
     for (int colIndex = 0; colIndex < headings.length; colIndex++) {
       sheet.getRangeByIndex(1, colIndex + 1).setText(headings[colIndex]);
       //styling headings
-      sheet.setColumnWidthInPixels(colIndex + 1, 100);
+      sheet.setColumnWidthInPixels(colIndex + 1, 120);
       xl.Style headingStyle = sheet.getRangeByIndex(1, colIndex + 1).cellStyle;
       headingStyle.bold = true;
-      headingStyle.fontSize = 15;
+      headingStyle.fontSize = 18;
     }
-    xl.Style purchaseStyle = sheet.getRangeByIndex(1, 1, 1, 2).cellStyle;
+    xl.Style purchaseStyle = sheet.getRangeByIndex(1, 2).cellStyle;
     purchaseStyle.fontColor = '#A82323';
-    xl.Style saleStyle = sheet.getRangeByIndex(1, 3, 1, 4).cellStyle;
+    xl.Style saleStyle = sheet.getRangeByIndex(1, 3).cellStyle;
     saleStyle.fontColor = '#23751A';
 
     final database = await DatabaseHelper.instance.database;
@@ -184,28 +214,49 @@ class _DashboardState extends State<Dashboard> {
         purchases.add(PurchaseModel.fromMap(purchase));
       }
     }
-    var purchaseList = groupByPurchase(purchases).entries;
-    var saleList = groupByOrders(orders).entries;
+    Iterable<MapEntry<String, double>> purchaseList =
+        groupByPurchase(purchases).entries;
+    Iterable<MapEntry<String, double>> saleList = groupByOrders(orders).entries;
 
-    for (int rowIndex = 0; rowIndex < purchaseList.length; rowIndex++) {
+    var mergedList = mergeLists(saleList, purchaseList).entries;
+
+    int rowIndex = 0;
+    num totalSales = 0;
+    num totalPurchases = 0;
+    for (; rowIndex < mergedList.length; rowIndex++) {
       int colIndex = 1;
+      sheet.getRangeByIndex(rowIndex + 2, colIndex++).setValue(
+          DateFormat('d MMM yyyy')
+              .format(DateTime.parse(mergedList.elementAt(rowIndex).key)));
       sheet
           .getRangeByIndex(rowIndex + 2, colIndex++)
-          .setValue(purchaseList.elementAt(rowIndex).key);
+          .setValue(mergedList.elementAt(rowIndex).value['purchase']);
+      totalPurchases += mergedList.elementAt(rowIndex).value['purchase'];
+
       sheet
           .getRangeByIndex(rowIndex + 2, colIndex++)
-          .setValue(purchaseList.elementAt(rowIndex).value);
+          .setValue(mergedList.elementAt(rowIndex).value['sale']);
+      totalSales += mergedList.elementAt(rowIndex).value['sale'];
+
+      sheet.getRangeByIndex(rowIndex + 2, colIndex++).setValue(
+          mergedList.elementAt(rowIndex).value['sale'] -
+              mergedList.elementAt(rowIndex).value['purchase']);
     }
 
-    for (int rowIndex = 0; rowIndex < saleList.length; rowIndex++) {
-      int colIndex = 3;
-      sheet
-          .getRangeByIndex(rowIndex + 2, colIndex++)
-          .setValue(saleList.elementAt(rowIndex).key);
-      sheet
-          .getRangeByIndex(rowIndex + 2, colIndex++)
-          .setValue(saleList.elementAt(rowIndex).value);
-    }
+    sheet.getRangeByIndex(rowIndex + 3, 1).setValue('Total');
+    sheet.getRangeByIndex(rowIndex + 3, 2).setValue(totalPurchases);
+    sheet.getRangeByIndex(rowIndex + 3, 3).setValue(totalSales);
+    xl.Style totalStyle =
+        sheet.getRangeByIndex(rowIndex + 3, 1, rowIndex + 3, 3).cellStyle;
+    totalStyle.fontSize = 13;
+    totalStyle.bold = true;
+
+    sheet
+        .getRangeByIndex(rowIndex + 3, 4)
+        .setValue(totalSales - totalPurchases);
+    xl.Style profitStyle = sheet.getRangeByIndex(rowIndex + 3, 4).cellStyle;
+    profitStyle.fontSize = 15;
+    profitStyle.bold = true;
 
     //saving file
     final List<int> bytes = workbook.saveAsStream();
