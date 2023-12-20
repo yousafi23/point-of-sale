@@ -113,8 +113,8 @@ class DatabaseHelper {
     await db.execute('''
     INSERT INTO Users (userId,name,userName,password,isAdmin)
     VALUES 
-    ('0','admin','admin','admin','1'),
-    ('1','staff','staff','staff','0')
+    ('0','admin','admin','admin123','1'),
+    ('1','staff','staff','staff123','0')
     ''');
     await db.execute('''
     INSERT INTO Products (category, prodName, barCode, unitCost, unitPrice, stock, companyName, supplierName)

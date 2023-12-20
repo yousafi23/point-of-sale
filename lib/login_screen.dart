@@ -14,6 +14,7 @@ class LoginScreen extends StatelessWidget {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
   LogInController logInController = Get.put(LogInController());
+  bool passwordVisible = false;
 
   LoginScreen({super.key});
 
@@ -59,13 +60,27 @@ class LoginScreen extends StatelessWidget {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
                 } else if (snapshot.hasError || snapshot.data == null) {
-                  return Container(
-                    color: Colors.purple.shade100,
-                    width: 200,
-                    height: 200,
-                    child: const Center(
-                      child: Icon(Icons.image_outlined, size: 50),
-                    ),
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Container(
+                          color: Colors.purple.shade100,
+                          width: 250,
+                          height: 250,
+                          child: const Center(
+                            child: Icon(Icons.image_outlined, size: 50),
+                          ),
+                        ),
+                      ),
+                      const Text(
+                        'Company',
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   );
                 } else {
                   final CompanyModel company = snapshot.data!;
@@ -119,14 +134,13 @@ class LoginScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      TextField(
-                        controller: passwordController,
-                        decoration: const InputDecoration(
-                          labelText: 'Password',
+                      PasswordField(
+                        passwordController: passwordController,
+                        onSubmit: () => logginIn(
+                          context,
+                          usernameController.text,
+                          passwordController.text,
                         ),
-                        obscureText: true,
-                        onSubmitted: (value) =>
-                            logginIn(context, usernameController.text, value),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
@@ -145,6 +159,44 @@ class LoginScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class PasswordField extends StatefulWidget {
+  const PasswordField(
+      {super.key, required this.passwordController, required this.onSubmit});
+  final TextEditingController passwordController;
+  final Function onSubmit;
+  @override
+  State<PasswordField> createState() => _PasswordFieldState();
+}
+
+class _PasswordFieldState extends State<PasswordField> {
+  bool passwordVisible = false;
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: widget.passwordController,
+      obscureText: !passwordVisible,
+      decoration: InputDecoration(
+        labelText: 'Password',
+        suffixIcon: IconButton(
+          icon: Icon(
+            passwordVisible ? Icons.visibility : Icons.visibility_off,
+            color: Colors.purple.shade800,
+            size: 16,
+          ),
+          onPressed: () {
+            setState(() {
+              passwordVisible = !passwordVisible;
+            });
+          },
+        ),
+      ),
+      onSubmitted: (value) {
+        widget.onSubmit();
+      },
     );
   }
 }

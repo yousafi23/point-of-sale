@@ -453,7 +453,7 @@ class _DashboardState extends State<Dashboard> {
                       primaryXAxis: DateTimeAxis(
                         // minimum: fromDate.add(Duration(hours: 1)),
                         // maximum: toDate.add(Durations.extralong1),
-                        dateFormat: DateFormat('d MMM HH:mm'),
+                        dateFormat: DateFormat('d MMM'),
                       ),
                       primaryYAxis: NumericAxis(),
                       // title: ChartTitle(text: 'Grand Total'),
