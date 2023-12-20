@@ -17,6 +17,36 @@ class LoginScreen extends StatelessWidget {
 
   LoginScreen({super.key});
 
+  Future<void> logginIn(
+      BuildContext context, String username, String password) async {
+    UserModel? user =
+        await DatabaseHelper.instance.loginCheck(username, password);
+
+    if (user != null) {
+      if (user.isAdmin) {
+        logInController.setIsAdmin(user.isAdmin);
+        myCustomSnackBar(
+          message: 'Admin LogIn: ${user.name}',
+          warning: false,
+          context: context,
+        );
+        Get.to(() => const Dashboard());
+      } else {
+        logInController.setIsAdmin(user.isAdmin);
+        myCustomSnackBar(
+            message: 'User LogIn: ${user.name}',
+            warning: false,
+            context: context);
+        Get.to(() => const PosScreen());
+      }
+    } else {
+      myCustomSnackBar(
+          message: 'Wrong Password Or Username',
+          warning: true,
+          context: context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,11 +56,17 @@ class LoginScreen extends StatelessWidget {
             FutureBuilder<CompanyModel?>(
               future: DatabaseHelper.instance.loadCompanyData(0),
               builder: (context, snapshot) {
-                // print('snapshot=$snapshot');
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
                 } else if (snapshot.hasError || snapshot.data == null) {
-                  return const Text('Error loading data.(Add Logo and title)');
+                  return Container(
+                    color: Colors.purple.shade100,
+                    width: 200,
+                    height: 200,
+                    child: const Center(
+                      child: Icon(Icons.image_outlined, size: 50),
+                    ),
+                  );
                 } else {
                   final CompanyModel company = snapshot.data!;
                   return Column(
@@ -89,40 +125,13 @@ class LoginScreen extends StatelessWidget {
                           labelText: 'Password',
                         ),
                         obscureText: true,
+                        onSubmitted: (value) =>
+                            logginIn(context, usernameController.text, value),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
-                        onPressed: () async {
-                          final username = usernameController.text;
-                          final password = passwordController.text;
-
-                          UserModel? user = await DatabaseHelper.instance
-                              .loginCheck(username, password);
-
-                          if (user != null) {
-                            if (user.isAdmin) {
-                              logInController.setIsAdmin(user.isAdmin);
-                              myCustomSnackBar(
-                                message: 'Admin LogIn: ${user.name}',
-                                warning: false,
-                                context: context,
-                              );
-                              Get.to(() => const Dashboard());
-                            } else {
-                              logInController.setIsAdmin(user.isAdmin);
-                              myCustomSnackBar(
-                                  message: 'User LogIn: ${user.name}',
-                                  warning: false,
-                                  context: context);
-                              Get.to(() => const PosScreen());
-                            }
-                          } else {
-                            myCustomSnackBar(
-                                message: 'Wrong Password Or Username',
-                                warning: true,
-                                context: context);
-                          }
-                        },
+                        onPressed: () => logginIn(context,
+                            usernameController.text, passwordController.text),
                         style: ButtonStyle(
                             backgroundColor: MaterialStateColor.resolveWith(
                                 (states) => Colors.purple.shade700)),
