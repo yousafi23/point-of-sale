@@ -336,7 +336,7 @@ class _DashboardState extends State<Dashboard> {
 
     if (item.itemDiscount != 0) {
       discountprice = item.price * (item.itemDiscount! / 100);
-      finalPrice = item.quantity * discountprice;
+      finalPrice = item.quantity * (item.price - discountprice);
 
       if (onlyDiscountValue == true) {
         return finalPrice;
@@ -711,7 +711,7 @@ class _DashboardState extends State<Dashboard> {
                             backgroundColor: Colors.purple.shade500,
                             foregroundColor: Colors.white),
                         child: const Text('Filter')),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     SizedBox(
                       height: 20,
                       child: DropdownButton<String>(
@@ -878,7 +878,7 @@ class _DashboardState extends State<Dashboard> {
                                       children: [
                                         const Text('Discount '),
                                         Text(
-                                          '${order.discountPercent}% = ${discountAmount.toStringAsFixed(1)}',
+                                          '${order.discountPercent}% = - ${discountAmount.toStringAsFixed(1)}',
                                           style: TextStyle(
                                               color: order.discountPercent != 0
                                                   ? Colors.red

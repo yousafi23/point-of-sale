@@ -37,7 +37,7 @@ class _OrderViewScreenState extends State<OrderViewScreen> {
   String calculateTotal(OrderItemModel item) {
     if (item.itemDiscount != 0) {
       var discountprice = item.price * (item.itemDiscount! / 100);
-      var finalPrice = item.quantity * discountprice;
+      var finalPrice = item.quantity * (item.price - discountprice);
       return '${item.price} x ${item.quantity} - ${item.itemDiscount}% = ${finalPrice.toStringAsFixed(1)}';
     } else {
       return '${item.price} x ${item.quantity} = ${item.price * item.quantity}';
@@ -165,7 +165,7 @@ class _OrderViewScreenState extends State<OrderViewScreen> {
                               children: [
                                 const Text('Discount '),
                                 Text(
-                                  '${order.discountPercent}% = ${discountAmount.toStringAsFixed(1)}',
+                                  '${order.discountPercent}% = - ${discountAmount.toStringAsFixed(1)}',
                                   style: TextStyle(
                                       color: order.discountPercent != 0
                                           ? Colors.red

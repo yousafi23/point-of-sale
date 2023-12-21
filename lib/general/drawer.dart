@@ -75,16 +75,14 @@ class ReusableDrawer extends StatelessWidget {
               title: 'Dashboard',
               page: const Dashboard(),
             ),
-          if (logInController.isAdmin == true)
-            createDrawerItem(
-              title: 'Products',
-              page: const ProductsScreen(),
-            ),
-          if (logInController.isAdmin == true)
-            createDrawerItem(
-              title: 'Ingredients',
-              page: const IngredientsScreen(),
-            ),
+          createDrawerItem(
+            title: 'POS',
+            page: const PosScreen(),
+          ),
+          createDrawerItem(
+            title: 'Orders',
+            page: const OrderViewScreen(),
+          ),
           createDrawerItem(
             title: 'POP',
             page: const PopScreen(),
@@ -99,19 +97,21 @@ class ReusableDrawer extends StatelessWidget {
               title: 'Users',
               page: const UsersScreen(),
             ),
-          createDrawerItem(
-            title: 'Orders',
-            page: const OrderViewScreen(),
-          ),
           if (logInController.isAdmin == true)
             createDrawerItem(
-              title: 'Company Settings',
+              title: 'Products',
+              page: const ProductsScreen(),
+            ),
+          if (logInController.isAdmin == true)
+            createDrawerItem(
+              title: 'Ingredients',
+              page: const IngredientsScreen(),
+            ),
+          if (logInController.isAdmin == true)
+            createDrawerItem(
+              title: 'Settings',
               page: const CompanySettingsScreen(),
             ),
-          createDrawerItem(
-            title: 'POS',
-            page: const PosScreen(),
-          ),
           createDrawerItem(
             title: 'Log Out',
             page: LoginScreen(),

@@ -74,7 +74,7 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: myCustomAppBar(
-        "Company Settings",
+        "Settings",
         const Color.fromARGB(255, 116, 2, 122),
       ),
       body: Padding(
