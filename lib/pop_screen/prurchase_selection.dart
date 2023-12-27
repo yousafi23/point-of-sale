@@ -3,6 +3,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:point_of_sale_app/database/db_helper.dart';
 import 'package:point_of_sale_app/database/purchase_model.dart';
 import 'package:point_of_sale_app/database/purhcase_item_model.dart';
@@ -74,7 +75,38 @@ class _PurchaseSelectionState extends State<PurchaseSelection> {
             return DataRow(
               cells: [
                 DataCell(Text(purchaseItemModel.name)),
-                DataCell(Text(purchaseItemModel.price.toString())),
+                // DataCell(Text(purchaseItemModel.price.toString())),
+                DataCell(
+                  TextFormField(
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                    initialValue: purchaseItemModel.price.toString(),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) async {
+                      if (value.isNotEmpty) {
+                        int? newPrice = int.tryParse(value.trim());
+
+                        PurchaseItemModel newPurchaseItemModel =
+                            purchaseItemModel.copyWith(price: newPrice);
+
+                        await DatabaseHelper.instance.updateRecord(
+                            'PurchaseItems',
+                            newPurchaseItemModel.toMap(),
+                            'purchaseItemId = ?',
+                            purchaseItemModel.purchaseItemId!);
+
+                        calculateGrandTotal();
+                        await _loadData();
+                      } else {
+                        myCustomSnackBar(
+                            context: context,
+                            message: 'Price can NOT be empty',
+                            warning: true);
+                      }
+                    },
+                  ),
+                ),
                 DataCell(Text(purchaseItemModel.quantity.toString())),
                 DataCell(Text(
                     (purchaseItemModel.price * purchaseItemModel.quantity)

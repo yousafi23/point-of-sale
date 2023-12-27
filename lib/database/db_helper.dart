@@ -175,17 +175,6 @@ class DatabaseHelper {
     );
   }
 
-  Future<int?> updateOrderItems(
-      dbTable, Map<String, dynamic> updatedRow, int id) async {
-    final Database? db = await instance.database;
-    return await db?.update(
-      dbTable,
-      updatedRow,
-      where: 'orderItemId = ?',
-      whereArgs: [id],
-    );
-  }
-
   Future<void> updateStock(int productId, bool isIncrement) async {
     final db = await database;
 
